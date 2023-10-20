@@ -14,7 +14,11 @@
 
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
 
+    <link rel="stylesheet" href="assets/css/bootstrap-datetimepicker.min.css">
+
     <link rel="stylesheet" href="assets/css/animate.css">
+
+    <link rel="stylesheet" href="assets/css/bootstrap-datetimepicker.min.css">
 
     <link rel="stylesheet" href="assets/plugins/select2/css/select2.min.css">
 
@@ -256,62 +260,193 @@
             <div class="content">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Edit Produk</h4>
-                        <h6>Update Produk</h6>
+                        <h4>Laporan Peminjaman</h4>
+                        <h6>Lihat Laporan Peminjaman</h6>
                     </div>
                 </div>
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Nama Peminjam</label>
-                                    <input type="text" value="Firdayanti">
+                        <div class="table-top">
+                            <div class="search-set">
+                                <div class="search-path">
+                                    <a class="btn btn-filter" id="filter_search">
+                                        <img src="assets/img/icons/filter.svg" alt="img">
+                                        <span><img src="assets/img/icons/closes.svg" alt="img"></span>
+                                    </a>
+                                </div>
+                                <div class="search-input">
+                                    <a class="btn btn-searchset"><img src="assets/img/icons/search-white.svg" alt="img"></a>
                                 </div>
                             </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">NIM</label>
-                                    <input type="text" value="J0304201069">
-                                </div>
+                            <div class="wordset">
+                                <ul>
+                                    <li>
+                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="pdf"><img src="assets/img/icons/pdf.svg" alt="img"></a>
+                                    </li>
+                                    <li>
+                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="excel"><img src="assets/img/icons/excel.svg" alt="img"></a>
+                                    </li>
+                                    <li>
+                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="print"><img src="assets/img/icons/printer.svg" alt="img"></a>
+                                    </li>
+                                </ul>
                             </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Nama Barang</label>
-                                    <input type="text" value="Arduino">
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Jumlah</label>
-                                    <div class="input-group">
-                                        <input type="button" value="-" class="bg-lightred badges dec button">
-                                        <input type="text" name="child" value="0" class="quantity-field">
-                                        <input type="button" value="+" class="bg-lightgreen badges inc button ">
+                        </div>
+                        
+                        <div class="card" id="filter_inputs">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-2 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <div class="input-groupicon">
+                                                <input type="text" placeholder="Dari Tanggal" class="datetimepicker">
+                                                <div class="addonset">
+                                                    <img src="assets/img/icons/calendars.svg" alt="img">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <div class="input-groupicon">
+                                                <input type="text" placeholder="Ke Tanggal" class="datetimepicker">
+                                                <div class="addonset">
+                                                    <img src="assets/img/icons/calendars.svg" alt="img">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-1 col-sm-6 col-12 ms-auto">
+                                        <div class="form-group">
+                                            <a class="btn btn-filters ms-auto"><img src="assets/img/icons/search-whites.svg" alt="img"></a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Tanggal Update</label>
-                                    <input type="text" value="11 Oktober 2023">
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Status Peminjaman</label>
-                                    <select class="select">
-                                        <option>Menunggu Konfirmasi</option>
-                                        <option>Disetujui</option>
-                                        <option>Ditolak</option>
-                                        <option>Sedang Dipinjam</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <a href="javascript:void(0);" class="btn btn-submit me-2">Update</a>
-                                <a href="loanlist.html" class="btn btn-cancel">Cancel</a>
-                            </div>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table  datanew">
+                                <thead>
+                                    <tr>
+                                    <th>
+                                        <label class="checkboxs">
+                                            <input type="checkbox" id="select-all">
+                                            <span class="checkmarks"></span>
+                                        </label>
+                                    </th>
+                                    <th>Nama Peminjam</th>
+                                    <th>NIM</th>
+                                    <th>Nama Barang</th>
+                                    <th>Jumlah</th>
+                                    <th>Tanggal Update</th>
+                                    <th>Status Peminjaman</th>
+                                    <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <label class="checkboxs">
+                                                <input type="checkbox">
+                                                <span class="checkmarks"></span>
+                                            </label>
+                                        </td>
+                                        <td>Firdayanti</td>
+                                        <td>J0304201069</td>
+                                        <td>Arduino</td>
+                                        <td>1</td>
+                                        <td>11 Oktober 2023</td>
+                                        <td><span class="bg-lightyellow badges">Menunggu Konfirmasi</span></td>
+                                        <td>
+                                            <a class="me-3" width=100% href="javascript:void(0);">
+                                                <img src="assets/img/icons/return.svg" alt="img">
+                                            </a>
+                                            <a class="me-3" href="editloan.html">
+                                                <img src="assets/img/icons/edit.svg" alt="img">
+                                            </a>
+                                            <a class="confirm-text" href="javascript:void(0);">
+                                                <img src="assets/img/icons/delete.svg" alt="img">
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label class="checkboxs">
+                                                <input type="checkbox">
+                                                <span class="checkmarks"></span>
+                                            </label>
+                                        </td>
+                                        <td>Firdayanti</td>
+                                        <td>J0304201069</td>
+                                        <td>Arduino</td>
+                                        <td>1</td>
+                                        <td>11 Oktober 2023</td>
+                                        <td><span class="bg-lightgreen badges">Disetujui</span></td>
+                                        <td>
+                                            <a class="me-3" width=100% href="javascript:void(0);">
+                                                <img src="assets/img/icons/return.svg" alt="img">
+                                            </a>
+                                            <a class="me-3" href="editloan.html">
+                                                <img src="assets/img/icons/edit.svg" alt="img">
+                                            </a>
+                                            <a class="confirm-text" href="javascript:void(0);">
+                                                <img src="assets/img/icons/delete.svg" alt="img">
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label class="checkboxs">
+                                                <input type="checkbox">
+                                                <span class="checkmarks"></span>
+                                            </label>
+                                        </td>
+                                        <td>Firdayanti</td>
+                                        <td>J0304201069</td>
+                                        <td>Arduino</td>
+                                        <td>1</td>
+                                        <td>11 Oktober 2023</td>
+                                        <td><span class="bg-lightred badges">Ditolak</span></td>
+                                        <td>
+                                            <a class="me-3" width=100% href="javascript:void(0);">
+                                                <img src="assets/img/icons/return.svg" alt="img">
+                                            </a>
+                                            <a class="me-3" href="editloan.html">
+                                                <img src="assets/img/icons/edit.svg" alt="img">
+                                            </a>
+                                            <a class="confirm-text" href="javascript:void(0);">
+                                                <img src="assets/img/icons/delete.svg" alt="img">
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <label class="checkboxs">
+                                                <input type="checkbox">
+                                                <span class="checkmarks"></span>
+                                            </label>
+                                        </td>
+                                        <td>Firdayanti</td>
+                                        <td>J0304201069</td>
+                                        <td>Arduino</td>
+                                        <td>1</td>
+                                        <td>11 Oktober 2023</td>
+                                        <td><span class="bg-lightgrey badges">Sedang Dipinjam</span></td>
+                                        <td>
+                                            <a class="me-3" width=100% href="javascript:void(0);">
+                                                <img src="assets/img/icons/return.svg" alt="img">
+                                            </a>
+                                            <a class="me-3" href="editloan.html">
+                                                <img src="assets/img/icons/edit.svg" alt="img">
+                                            </a>
+                                            <a class="confirm-text" href="javascript:void(0);">
+                                                <img src="assets/img/icons/delete.svg" alt="img">
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -330,7 +465,13 @@
 
     <script src="assets/js/bootstrap.bundle.min.js"></script>
 
+    <script src="assets/js/moment.min.js"></script>
+    <script src="assets/js/bootstrap-datetimepicker.min.js"></script>
+
     <script src="assets/plugins/select2/js/select2.min.js"></script>
+
+    <script src="assets/js/moment.min.js"></script>
+    <script src="assets/js/bootstrap-datetimepicker.min.js"></script>
 
     <script src="assets/plugins/sweetalert/sweetalert2.all.min.js"></script>
     <script src="assets/plugins/sweetalert/sweetalerts.min.js"></script>

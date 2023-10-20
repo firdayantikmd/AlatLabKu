@@ -14,7 +14,11 @@
 
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
 
+    <link rel="stylesheet" href="assets/css/bootstrap-datetimepicker.min.css">
+
     <link rel="stylesheet" href="assets/css/animate.css">
+
+    <link rel="stylesheet" href="assets/css/bootstrap-datetimepicker.min.css">
 
     <link rel="stylesheet" href="assets/plugins/select2/css/select2.min.css">
 
@@ -256,11 +260,8 @@
             <div class="content">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Daftar Pengguna</h4>
-                        <h6>Kelola Pengguna</h6>
-                    </div>
-                    <div class="page-btn">
-                        <a href="adduser.html" class="btn btn-added"><img src="assets/img/icons/plus.svg" alt="img" class="me-1">Tambah Pengguna</a>
+                        <h4>Laporan Produk</h4>
+                        <h6>Lihat laporan penambahan produk</h6>
                     </div>
                 </div>
                 <div class="card">
@@ -292,12 +293,32 @@
                             </div>
                         </div>
                         
-                        <div class="card mb-0" id="filter_inputs">
-                            <div class="card-body pb-0">
+                        <div class="card" id="filter_inputs">
+                            <div class="card-body">
                                 <div class="row">
                                     <div class="col-lg-2 col-sm-6 col-12">
                                         <div class="form-group">
-                                            <input type="text" name="" id="">
+                                            <div class="input-groupicon">
+                                                <input type="text" placeholder="Dari Tanggal" class="datetimepicker">
+                                                <div class="addonset">
+                                                    <img src="assets/img/icons/calendars.svg" alt="img">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-2 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <div class="input-groupicon">
+                                                <input type="text" placeholder="Ke Tanggal" class="datetimepicker">
+                                                <div class="addonset">
+                                                    <img src="assets/img/icons/calendars.svg" alt="img">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-1 col-sm-6 col-12 ms-auto">
+                                        <div class="form-group">
+                                            <a class="btn btn-filters ms-auto"><img src="assets/img/icons/search-whites.svg" alt="img"></a>
                                         </div>
                                     </div>
                                 </div>
@@ -305,7 +326,7 @@
                         </div>
                         
                         <div class="table-responsive">
-                            <table class="table  datanew">
+                            <table class="table datanew">
                                 <thead>
                                     <tr>
                                     <th>
@@ -314,16 +335,13 @@
                                             <span class="checkmarks"></span>
                                         </label>
                                     </th>
-                                    <th>Foto Profil</th>
-                                    <th>Foto KTM</th>
-                                    <th>Username</th>
-                                    <th>No. HP</th>
-                                    <th>Email</th>
-                                    <th>Nama Pengguna</th>
-                                    <th>NIM</th>
-                                    <th>Program Studi</th>
-                                    <th>Role</th>
-                                    <th>Dibuat pada</th>
+                                    <th>Nama Produk</th>
+                                    <th>Kategori</th>
+                                    <th>Tempat Barang</th>
+                                    <th>Ditambahkan pada</th>
+                                    <th>Stok</th>
+                                    <th>Detail</th>
+                                    <th>Status</th>
                                     <th>Action</th>
                                     </tr>
                                 </thead>
@@ -335,26 +353,23 @@
                                                 <span class="checkmarks"></span>
                                             </label>
                                         </td>
-                                        <td class="profilimgname">
+                                        <td class="productimgname">
                                             <a href="javascript:void(0);" class="product-img">
-                                                <img src="assets/img/profil.jpg" alt="product">
+                                                <img src="assets/img/product/product1.jpg" alt="product">
                                             </a>
+                                            <a href="javascript:void(0);">Arduino</a>
                                         </td>
-                                        <td class="ktmimgname">
-                                            <a href="javascript:void(0);" class="product-img">
-                                                <img src="assets/img/ktp.jpeg" alt="product">
-                                            </a>
-                                        </td>
-                                        <td>firdayantikmd</td>
-                                        <td>082293372336</td>
-                                        <td>firdayantikmd@gmail.com</td>
-                                        <td>firdayantikmd</td>
-                                        <td>J0304201069</td>
-                                        <td>Teknologi Rekayasa Komputer</td>
-                                        <td>Mahasiswa</td>
-                                        <td>10 Oktober 2023</td>
+                                        <td>Komponen</td>
+                                        <td>Lemari 1</td>
+                                        <td>11 Oktober 2023</td>
+                                        <td>100</td>
+                                        <td>12v</td>
+                                        <td><span class="bg-lightgreen badges">Tersedia</span></td>
                                         <td>
-                                            <a class="me-3" href="edituser.html">
+                                            <a class="me-3" href="productdetails.html">
+                                                <img src="assets/img/icons/eye.svg" alt="img">
+                                            </a>
+                                            <a class="me-3" href="editproduct.html">
                                                 <img src="assets/img/icons/edit.svg" alt="img">
                                             </a>
                                             <a class="confirm-text" href="javascript:void(0);">
@@ -369,26 +384,23 @@
                                                 <span class="checkmarks"></span>
                                             </label>
                                         </td>
-                                        <td class="profilimgname">
+                                        <td class="productimgname">
                                             <a href="javascript:void(0);" class="product-img">
-                                                <img src="assets/img/profil.jpg" alt="product">
+                                                <img src="assets/img/product/product1.jpg" alt="product">
                                             </a>
+                                            <a href="javascript:void(0);">ESP32</a>
                                         </td>
-                                        <td class="ktmimgname">
-                                            <a href="javascript:void(0);" class="product-img">
-                                                <img src="assets/img/ktp.jpeg" alt="product">
-                                            </a>
-                                        </td>
-                                        <td>dwiyulinar</td>
-                                        <td>082293372336</td>
-                                        <td>dwi12345@gmail.com</td>
-                                        <td>Dwi Yulinar</td>
-                                        <td>J0304201060</td>
-                                        <td>Teknologi Rekayasa Komputer</td>
-                                        <td>Admin</td>
-                                        <td>09 Oktober 2023</td>
+                                        <td>Komponen</td>
+                                        <td>Lemari 1</td>
+                                        <td>11 Oktober 2023</td>
+                                        <td>100</td>
+                                        <td>12v</td>
+                                        <td><span class="bg-lightred badges">Tidak Tersedia</span></td>
                                         <td>
-                                            <a class="me-3" href="edituser.html">
+                                            <a class="me-3" href="productdetails.html">
+                                                <img src="assets/img/icons/eye.svg" alt="img">
+                                            </a>
+                                            <a class="me-3" href="editproduct.html">
                                                 <img src="assets/img/icons/edit.svg" alt="img">
                                             </a>
                                             <a class="confirm-text" href="javascript:void(0);">
@@ -736,7 +748,13 @@
 
     <script src="assets/js/bootstrap.bundle.min.js"></script>
 
+    <script src="assets/js/moment.min.js"></script>
+    <script src="assets/js/bootstrap-datetimepicker.min.js"></script>
+
     <script src="assets/plugins/select2/js/select2.min.js"></script>
+
+    <script src="assets/js/moment.min.js"></script>
+    <script src="assets/js/bootstrap-datetimepicker.min.js"></script>
 
     <script src="assets/plugins/sweetalert/sweetalert2.all.min.js"></script>
     <script src="assets/plugins/sweetalert/sweetalerts.min.js"></script>
