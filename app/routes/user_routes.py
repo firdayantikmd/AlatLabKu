@@ -1,4 +1,7 @@
-from flask import Blueprint
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from models.user import User, UserRole
+from database import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 user_routes = Blueprint('user_routes', __name__)
 
@@ -6,13 +9,58 @@ user_routes = Blueprint('user_routes', __name__)
 def hello():
     return "Hello!!"
 
-@user_routes.route('/register', methods=['GET', 'POST'])
-def register():
-    pass
+@user_routes.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
 
-@user_routes.route('/login', methods=['GET', 'POST'])
-def login():
-    pass
+        # Check if user already exists
+        user = User.query.filter_by(username=username).first()
+        if user:
+            flash('Username already exists. Choose another one.')
+            return redirect(url_for('user_routes.signup'))
+
+        # Store user details in database
+        new_user = User(
+            username=username,
+            email=email,
+            password=generate_password_hash(password, method='pbkdf2:sha256'),
+            role='Mahasiswa'
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('Registration successful. Please login.')
+        return redirect(url_for('user_routes.signin'))
+
+    return render_template('signup.html')
+
+@user_routes.route('/signin', methods=['GET', 'POST'])
+def signin():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user = User.query.filter_by(email=email).first()
+
+        if not user or not check_password_hash(user.password, password):
+            flash('Incorrect email or password. Please try again.')
+            return redirect(url_for('user_routes.signin'))
+
+        session['username'] = user.username
+
+        flash('Login successful!')
+        return redirect(url_for('base_routes.home'))
+
+    return render_template('signin.html')
+
+@user_routes.route('/logout', methods=['GET'])
+def logout():
+    # Remove the user data from the session if it's there
+    session.pop('username', None)
+    flash('You have been logged out.')
+    return redirect(url_for('user_routes.signin'))
 
 @user_routes.route('/users', methods=['GET'])
 def get_users():
