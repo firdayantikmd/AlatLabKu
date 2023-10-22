@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: flask run --host=0.0.0.0 --port=15000
+    volumes:
+      - ./app:/app
+    ports:
+      - "15000:15000"
+    environment:
+      FLASK_APP: run.py
+      FLASK_ENV: development
+    depends_on:
+      - db
+  db:
+    image: postgres:14.3
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass!!0101
+      - POSTGRES_DB=postgres

@@ -1,0 +1,1 @@
+SQLALCHEMY_DATABASE_URI="postgresql://user:pass!!0101@db:5432/alatlabku"
