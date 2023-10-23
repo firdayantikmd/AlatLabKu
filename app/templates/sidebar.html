@@ -1,0 +1,58 @@
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-inner slimscroll">
+        <div id="sidebar-menu" class="sidebar-menu">
+            <ul>
+                <li class="active">
+                    <a href="index.html"><img src="static/img/icons/dashboard.svg" alt="img"><span> Dashboard</span> </a>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="static/img/icons/product.svg" alt="img"><span>Produk</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="productlist.html">Daftar Produk</a></li>
+                        <li><a href="addproduct.html">Tambah Produk</a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="static/img/icons/users1.svg" alt="img"><span>Pengguna</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="{{ url_for('user_routes.get_userlist') }}">Daftar Pengguna</a></li>
+                        <li><a href="adduser.html">Tambah Pengguna</a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="static/img/icons/transfer1.svg" alt="img"><span>Peminjaman</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="loanlist.html">Daftar Peminjaman</a></li>
+                        <li><a href="addloan.html">Ajukan Peminjaman</a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="static/img/icons/return1.svg" alt="img"><span>Pengembalian</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="returnlist.html">Daftar Pengembalian</a></li>
+                        <li><a href="loanlist.html">Ajukan Pengembalian</a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="static/img/icons/report.svg" alt="img"><span>Laporan</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="productreport.html">Laporan Produk</a></li>
+                        <li><a href="loanreport.html">Laporan Peminjaman</a></li>
+                        <li><a href="returnreport.html">Laporan Pengembalian</a></li>
+                    </ul>
+                </li>
+                <li class="submenu">
+                    <a href="javascript:void(0);"><img src="static/img/icons/settings.svg" alt="img"><span> Settings</span> <span class="menu-arrow"></span></a>
+                    <ul>
+                        <li><a href="generalsettings.html">General Settings</a></li>
+                        <li><a href="emailsettings.html">Email Settings</a></li>
+                        <li><a href="paymentsettings.html">Payment Settings</a></li>
+                        <li><a href="currencysettings.html">Currency Settings</a></li>
+                        <li><a href="grouppermissions.html">Group Permissions</a></li>
+                        <li><a href="taxrates.html">Tax Rates</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Enum
+from sqlalchemy import Column, Integer, String, Enum, DateTime, func
 from database import db
 
 UserRole = Enum('Mahasiswa', 'Admin Lab', name="user_role")
@@ -8,9 +8,14 @@ class User(db.Model):
 
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True)
-    email = Column(String, unique=True)
     password = Column(String)
-    role = Column(UserRole)
-    personal_data = Column(String)
-    photo = Column(String)
+    full_name = Column(String)
+    email = Column(String, unique=True)
+    no_hp = Column(String, unique=True)
     self_photo = Column(String)
+    ktm_photo = Column(String)
+    ktp_photo = Column(String)
+    student_id = Column(String, unique=True)
+    major = Column(String)
+    role = Column(UserRole)
+    created_at = Column(DateTime, default=func.now())

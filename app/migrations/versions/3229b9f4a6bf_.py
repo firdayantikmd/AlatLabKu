@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 4aeaa7a8838b
+Revision ID: 3229b9f4a6bf
 Revises: 
-Create Date: 2023-10-22 10:44:28.550669
+Create Date: 2023-10-22 16:49:01.320324
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4aeaa7a8838b'
+revision = '3229b9f4a6bf'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,14 +21,20 @@ def upgrade():
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(), nullable=True),
-    sa.Column('email', sa.String(), nullable=True),
     sa.Column('password', sa.String(), nullable=True),
-    sa.Column('role', sa.Enum('Mahasiswa', 'Admin Lab', name='user_role'), nullable=True),
-    sa.Column('personal_data', sa.String(), nullable=True),
-    sa.Column('photo', sa.String(), nullable=True),
+    sa.Column('full_name', sa.String(), nullable=True),
+    sa.Column('email', sa.String(), nullable=True),
+    sa.Column('no_hp', sa.String(), nullable=True),
     sa.Column('self_photo', sa.String(), nullable=True),
+    sa.Column('ktm_photo', sa.String(), nullable=True),
+    sa.Column('ktp_photo', sa.String(), nullable=True),
+    sa.Column('student_id', sa.String(), nullable=True),
+    sa.Column('major', sa.String(), nullable=True),
+    sa.Column('role', sa.Enum('Mahasiswa', 'Admin Lab', name='user_role'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('no_hp'),
+    sa.UniqueConstraint('student_id'),
     sa.UniqueConstraint('username')
     )
     # ### end Alembic commands ###

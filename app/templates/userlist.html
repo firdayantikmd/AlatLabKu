@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <meta name="description" content="POS - Bootstrap Admin Template">
+    <meta name="keywords" content="admin, estimates, bootstrap, business, corporate, creative, management, minimal, modern,  html5, responsive">
+    <meta name="author" content="Dreamguys - Bootstrap Admin Template">
+    <meta name="robots" content="noindex, nofollow">
+
+    <title>AlatLabKu</title>
+
+    <link rel="shortcut icon" type="image/x-icon" href="static/img/favicon.png">
+
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="static/css/animate.css">
+
+    <link rel="stylesheet" href="static/plugins/select2/css/select2.min.css">
+
+    <link rel="stylesheet" href="static/css/dataTables.bootstrap4.min.css">
+
+    <link rel="stylesheet" href="static/plugins/fontawesome/css/fontawesome.min.css">
+    <link rel="stylesheet" href="static/plugins/fontawesome/css/all.min.css">
+
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+
+<body>
+    <div id="global-loader">
+        <div class="whirly-loader"> </div>
+    </div>
+
+    <div class="main-wrapper">
+        {% include 'navbar.html' %}
+        {% include 'sidebar.html' %}
+
+        <div class="page-wrapper">
+            <div class="content">
+                <div class="page-header">
+                    <div class="page-title">
+                        <h4>Daftar Pengguna</h4>
+                        <h6>Kelola Pengguna</h6>
+                    </div>
+                    <div class="page-btn">
+                        <a href="adduser.html" class="btn btn-added"><img src="static/img/icons/plus.svg" alt="img" class="me-1">Tambah Pengguna</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-top">
+                            <div class="search-set">
+                                <div class="search-path">
+                                    <form action="/userlist" method="get">  <!-- Form to handle searching -->
+                                        <input type="text" name="search" placeholder="Search..." value="{{ request.args.get('search', '') }}">
+                                        <button type="submit" class="btn btn-searchset">
+                                            <img src="static/img/icons/search-white.svg" alt="img">
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="search-input">
+                                    <a class="btn btn-searchset"><img src="static/img/icons/search-white.svg" alt="img"></a>
+                                </div>
+                            </div>
+                            <div class="wordset">
+                                <ul>
+                                    <li>
+                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="pdf"><img src="static/img/icons/pdf.svg" alt="img"></a>
+                                    </li>
+                                    <li>
+                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="excel"><img src="static/img/icons/excel.svg" alt="img"></a>
+                                    </li>
+                                    <li>
+                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="print"><img src="static/img/icons/printer.svg" alt="img"></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card mb-0" id="filter_inputs">
+                            <div class="card-body pb-0">
+                                <div class="row">
+                                    <div class="col-lg-2 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <input type="text" name="" id="">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table  datanew">
+                                <thead>
+                                    <tr>
+                                    <th>
+                                        <label class="checkboxs">
+                                            <input type="checkbox" id="select-all">
+                                            <span class="checkmarks"></span>
+                                        </label>
+                                    </th>
+                                    <th>Foto Profil</th>
+                                    <th>Foto KTM</th>
+                                    <th>Username</th>
+                                    <th>No. HP</th>
+                                    <th>Email</th>
+                                    <th>Nama Pengguna</th>
+                                    <th>NIM</th>
+                                    <th>Program Studi</th>
+                                    <th>Role</th>
+                                    <th>Dibuat pada</th>
+                                    <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                        <tr>
+                                            <td>
+                                                <label class="checkboxs">
+                                                    <input type="checkbox">
+                                                    <span class="checkmarks"></span>
+                                                </label>
+                                            </td>
+                                            <td class="profilimgname">
+                                                <a href="javascript:void(0);" class="product-img">
+                                                    <img src="{{ user.self_photo }}" alt="user's profile image">
+                                                </a>
+                                            </td>
+                                            <td class="ktmimgname">
+                                                <a href="javascript:void(0);" class="product-img">
+                                                    <img src="{{ user.ktm_photo }}" alt="user's ktm image">
+                                                </a>
+                                            </td>
+                                            <td>{{ user.username }}</td>
+                                            <td>{{ user.no_hp }}</td>
+                                            <td>{{ user.email }}</td>
+                                            <td>{{ user.full_name }}</td>
+                                            <td>{{ user.student_id }}</td>
+                                            <td>{{ user.major }}</td>
+                                            <td>{{ user.role }}</td>
+                                            <!-- You may need to adjust the following if you have a created_at field or similar in your user model -->
+                                            <td>{{ user.created_at|default("Date not available", true) }}</td> 
+                                            <td>
+                                                <a class="me-3" href="edituser.html?id={{ user.id }}">
+                                                    <img src="static/img/icons/edit.svg" alt="edit">
+                                                </a>
+                                                <a class="confirm-text" href="deleteuser.html?id={{ user.id }}">
+                                                    <img src="static/img/icons/delete.svg" alt="delete">
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="records-per-page">
+                            <label for="per_page">Records per page:</label>
+                            <select id="per_page" onchange="location = this.value;">
+                                <option value="{{ url_for('user_routes.get_userlist', page=1, per_page=10) }}" {% if request.args.get('per_page', '10') == '10' %}selected{% endif %}>10</option>
+                                <option value="{{ url_for('user_routes.get_userlist', page=1, per_page=25) }}" {% if request.args.get('per_page', '10') == '25' %}selected{% endif %}>25</option>
+                                <option value="{{ url_for('user_routes.get_userlist', page=1, per_page=50) }}" {% if request.args.get('per_page', '10') == '50' %}selected{% endif %}>50</option>
+                            </select>
+                        </div>                        
+
+                        <!-- ... (rest of your content, including the table) -->
+
+                        <!-- Pagination controls -->
+                        <div class="pagination-controls">
+                            <ul class="pagination">
+                                {% set per_page = request.args.get('per_page', '10') %} <!-- Get the per_page value from request -->
+                        
+                                {% if pagination.has_prev %}
+                                    <li><a href="{{ url_for('user_routes.get_userlist', page=pagination.prev_num, per_page=per_page) }}">Previous</a></li>
+                                {% else %}
+                                    <li class="disabled"><a>Previous</a></li>
+                                {% endif %}
+                        
+                                {% for page_num in pagination.iter_pages() %}
+                                    {% if page_num %}
+                                        {% if page_num != pagination.page %}
+                                            <li><a href="{{ url_for('user_routes.get_userlist', page=page_num, per_page=per_page) }}">{{ page_num }}</a></li>
+                                        {% else %}
+                                            <li class="active"><a>{{ page_num }}</a></li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li><span class="ellipsis">...</span></li>
+                                    {% endif %}
+                                {% endfor %}
+                        
+                                {% if pagination.has_next %}
+                                    <li><a href="{{ url_for('user_routes.get_userlist', page=pagination.next_num, per_page=per_page) }}">Next</a></li>
+                                {% else %}
+                                    <li class="disabled"><a>Next</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="static/js/jquery-3.6.0.min.js"></script>
+
+    <script src="static/js/feather.min.js"></script>
+
+    <script src="static/js/jquery.slimscroll.min.js"></script>
+
+    <script src="static/js/jquery.dataTables.min.js"></script>
+    <script src="static/js/dataTables.bootstrap4.min.js"></script>
+
+    <script src="static/js/bootstrap.bundle.min.js"></script>
+
+    <script src="static/plugins/select2/js/select2.min.js"></script>
+
+    <script src="static/plugins/sweetalert/sweetalert2.all.min.js"></script>
+    <script src="static/plugins/sweetalert/sweetalerts.min.js"></script>
+
+    <script src="static/js/script.js"></script>
+
+</body>
+
+</html>
