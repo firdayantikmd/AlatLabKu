@@ -11,9 +11,10 @@
 
     <title>AlatLabKu</title>
 
-    <link rel="shortcut icon" type="image/x-icon" href="static/img/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.png') }}">
 
-    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="static/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 
     <link rel="stylesheet" href="static/css/animate.css">
 
@@ -43,8 +44,13 @@
                         <h4>Daftar Pengguna</h4>
                         <h6>Kelola Pengguna</h6>
                     </div>
-                    <div class="page-btn">
+                    <!-- <div class="page-btn">
                         <a href="adduser.html" class="btn btn-added"><img src="static/img/icons/plus.svg" alt="img" class="me-1">Tambah Pengguna</a>
+                    </div> -->
+                    <div class="page-btn">
+                        <a href="{{ url_for('user_routes.add_user') }}" class="btn btn-added"> <!-- Adjusted for dynamic routing -->
+                            <img src="{{ url_for('static', filename='img/icons/plus.svg') }}" alt="img" class="me-1">Tambah Pengguna
+                        </a>
                     </div>
                 </div>
                 <div class="card">
@@ -52,7 +58,8 @@
                         <div class="table-top">
                             <div class="search-set">
                                 <div class="search-path">
-                                    <form action="/userlist" method="get">  <!-- Form to handle searching -->
+                                    <!-- <form action="/userlist" method="get">  Form to handle searching -->
+                                    <form action="{{ url_for('user_routes.get_userlist') }}" method="get">
                                         <input type="text" name="search" placeholder="Search..." value="{{ request.args.get('search', '') }}">
                                         <button type="submit" class="btn btn-searchset">
                                             <img src="static/img/icons/search-white.svg" alt="img">
@@ -101,7 +108,7 @@
                                         </label>
                                     </th>
                                     <th>Foto Profil</th>
-                                    <th>Foto KTM</th>
+                                    <th>Foto KTM/KTP</th>
                                     <th>Username</th>
                                     <th>No. HP</th>
                                     <th>Email</th>
@@ -129,7 +136,7 @@
                                             </td>
                                             <td class="ktmimgname">
                                                 <a href="javascript:void(0);" class="product-img">
-                                                    <img src="{{ user.ktm_photo }}" alt="user's ktm image">
+                                                    <img src="{{ user.card_photo }}" alt="user's ktm image">
                                                 </a>
                                             </td>
                                             <td>{{ user.username }}</td>
@@ -142,11 +149,11 @@
                                             <!-- You may need to adjust the following if you have a created_at field or similar in your user model -->
                                             <td>{{ user.created_at|default("Date not available", true) }}</td> 
                                             <td>
-                                                <a class="me-3" href="edituser.html?id={{ user.id }}">
-                                                    <img src="static/img/icons/edit.svg" alt="edit">
+                                                <a class="me-3" href="{{ url_for('user_routes.edituser', id=user.id) }}"> <!-- Adjusted for dynamic routing -->
+                                                    <img src="{{ url_for('static', filename='img/icons/edit.svg') }}" alt="edit">
                                                 </a>
-                                                <a class="confirm-text" href="deleteuser.html?id={{ user.id }}">
-                                                    <img src="static/img/icons/delete.svg" alt="delete">
+                                                <a class="confirm-text" href="{{ url_for('user_routes.delete_user', id=user.id) }}"> <!-- Adjusted for dynamic routing -->
+                                                    <img src="{{ url_for('static', filename='img/icons/delete.svg') }}" alt="delete">
                                                 </a>
                                             </td>
                                         </tr>
@@ -203,7 +210,8 @@
         </div>
     </div>
 
-    <script src="static/js/jquery-3.6.0.min.js"></script>
+    <!-- <script src="static/js/jquery-3.6.0.min.js"></script> -->
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
 
     <script src="static/js/feather.min.js"></script>
 
@@ -219,7 +227,8 @@
     <script src="static/plugins/sweetalert/sweetalert2.all.min.js"></script>
     <script src="static/plugins/sweetalert/sweetalerts.min.js"></script>
 
-    <script src="static/js/script.js"></script>
+    <!-- <script src="static/js/script.js"></script> -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
 </body>
 

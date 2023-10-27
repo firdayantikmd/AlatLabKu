@@ -87,3 +87,58 @@ def get_userlist():
     users = pagination.items
 
     return render_template('userlist.html', users=users, pagination=pagination)
+
+@user_routes.route('/edituser/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edituser(id):
+    # Assuming you have a User model that queries users by id
+    user = User.query.get(id)
+    
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for('user_routes.get_userlist'))  # Assuming you have a user list route
+
+    if request.method == 'GET':
+        # Render an edit user template with the user's data
+        return render_template('edituser.html', user=user)
+
+    elif request.method == 'POST':
+        # Fetch data from form (assuming you're using form data to send the updates)
+        username = request.form.get('username')
+        email = request.form.get('email')
+        full_name = request.form.get('full_name')
+        student_id = request.form.get('student_id')
+        no_hp = request.form.get('no_hp')
+
+        # Update user data
+        user.username = username
+        user.email = email
+        user.full_name = full_name if full_name else user.full_name
+        user.student_id = student_id if student_id else user.student_id
+        user.no_hp = no_hp if no_hp else user.no_hp
+
+        # Save changes to database
+        db.session.commit()
+
+        flash("User updated successfully!", "success")
+        return redirect(url_for('user_routes.get_userlist'))
+
+@user_routes.route('/delete_user/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_user(id):
+    user = User.query.get(id)
+    
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for('user_routes.get_userlist'))
+
+    db.session.delete(user)
+    db.session.commit()
+
+    flash("User deleted successfully!", "success")
+    return redirect(url_for('user_routes.get_userlist'))
+
+@user_routes.route('/add_user', methods=['POST'])
+@login_required
+def add_user(id):
+    pass
