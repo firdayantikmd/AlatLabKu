@@ -138,7 +138,56 @@ def delete_user(id):
     flash("User deleted successfully!", "success")
     return redirect(url_for('user_routes.get_userlist'))
 
-@user_routes.route('/add_user', methods=['POST'])
+@user_routes.route('/add_user', methods=['GET', 'POST'])
 @login_required
-def add_user(id):
-    pass
+def add_user():
+    if request.method == 'GET':
+        return render_template('adduser.html')
+
+    elif request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        full_name = request.form.get('full_name')
+        student_id = request.form.get('student_id')
+        no_hp = request.form.get('no_hp')
+        self_photo = request.form.get('self_photo')  # assuming this is a string path, adjust if using file uploads
+        card_photo = request.form.get('card_photo')  # same assumption as self_photo
+        major = request.form.get('major')
+        role = request.form.get('role', 'Mahasiswa')
+
+        # Check if username, email, or student_id already exists
+        user_by_username = User.query.filter_by(username=username).first()
+        user_by_email = User.query.filter_by(email=email).first()
+        user_by_student_id = User.query.filter_by(student_id=student_id).first()
+
+        if user_by_username:
+            flash('Username already exists. Choose another one.')
+            return redirect(url_for('user_routes.add_user'))
+        if user_by_email:
+            flash('Email already exists. Choose another one.')
+            return redirect(url_for('user_routes.add_user'))
+        if user_by_student_id:
+            flash('Student ID already exists. Choose another one.')
+            return redirect(url_for('user_routes.add_user'))
+
+        # Store user details in database
+        new_user = User(
+            username=username,
+            email=email,
+            password=generate_password_hash(password, method='pbkdf2:sha256'),
+            full_name=full_name,
+            student_id=student_id,
+            no_hp=no_hp,
+            self_photo=self_photo,
+            card_photo=card_photo,
+            major=major,
+            role=role  # you might need to ensure this matches the UserRole enum
+        )
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash('User added successfully!')
+        return redirect(url_for('user_routes.get_userlist'))
+
+    return render_template('adduser.html',  users=users, pagination=pagination)

@@ -10,20 +10,20 @@
 
     <title>AlatLabKu</title>
 
-    <link rel="shortcut icon" type="image/x-icon" href="static/img/logo-small.png">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='img/favicon.png') }}">
 
-    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 
-    <link rel="stylesheet" href="static/css/animate.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animate.css') }}">
 
-    <link rel="stylesheet" href="static/plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/select2/css/select2.min.css') }}">
 
-    <link rel="stylesheet" href="static/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dataTables.bootstrap4.min.css') }}">
 
-    <link rel="stylesheet" href="static/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="static/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome/css/fontawesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome/css/all.min.css') }}">
 
-    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
@@ -45,110 +45,118 @@
                 </div>
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="form-group">
-                                    <label>Foto Profil</label>
-                                    <div class="image-upload">
-                                        <input type="file">
-                                        <div class="image-uploads">
-                                            <img src="static/img/icons/upload.svg" alt="img">
-                                            <h4>Drag and drop a file to upload</h4>
+                        <form action="{{ url_for('user_routes.add_user') }}" method="post" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Foto Profil</label>
+                                        <div class="image-upload">
+                                            <input type="file" name="self_photo">
+                                            <div class="image-uploads">
+                                                <img src="{{ url_for('static', filename='img/icons/upload.svg') }}" alt="img">
+                                                <h4>Drag and drop a file to upload</h4>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="form-group">
-                                    <label>Foto KTM/KTP</label>
-                                    <div class="image-upload">
-                                        <input type="file">
-                                        <div class="image-uploads">
-                                            <img src="static/img/icons/upload.svg" alt="img">
-                                            <h4>Drag and drop a file to upload</h4>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Foto KTM/KTP</label>
+                                        <div class="image-upload">
+                                            <input type="file" name="card_photo">
+                                            <div class="image-uploads">
+                                                <img src="{{ url_for('static', filename='img/icons/upload.svg') }}" alt="img">
+                                                <h4>Drag and drop a file to upload</h4>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Username</label>
-                                    <input type="text">
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="">Username</label>
+                                        <input type="text" name="username">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="form-group">
-                                    <label for="">No.HP</label>
-                                    <input type="text">
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="">Password</label>
+                                        <input type="text" name="password">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="form-group">
-                                    <label for="">Email</label>
-                                    <input type="text">
+                                <div class="col-lg-3 col-sm-6">
+                                    <div class="form-group">
+                                        <label for="">No.HP</label>
+                                        <input type="text" name="no_hp">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="form-group">
-                                    <label for="">Nama Lengkap</label>
-                                    <input type="text">
+                                <div class="col-lg-3 col-sm-6">
+                                    <div class="form-group">
+                                        <label for="">Email</label>
+                                        <input type="text" name="email">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="form-group">
-                                    <label for="">NIM</label>
-                                    <input type="text">
+                                <div class="col-lg-3 col-sm-6">
+                                    <div class="form-group">
+                                        <label for="">Nama Lengkap</label>
+                                        <input type="text" name="full_name">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="form-group">
-                                    <label for="">Program Studi</label>
-                                    <input type="text">
+                                <div class="col-lg-3 col-sm-6">
+                                    <div class="form-group">
+                                        <label for="">NIM</label>
+                                        <input type="text" name="student_id">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6">
-                                <div class="form-group">
-                                    <label>Role</label>
-                                    <select class="select">
-                                        <option>Admin</option>
-                                        <option>Mahasiswa</option>
-                                    </select>
+                                <div class="col-lg-3 col-sm-6">
+                                    <div class="form-group">
+                                        <label for="">Program Studi</label>
+                                        <input type="text" name="major">
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Dibuat Pada</label>
-                                    <input type="text" placeholder="10 Oktober 2023">
+                                <div class="col-lg-3 col-sm-6">
+                                    <div class="form-group">
+                                        <label>Role</label>
+                                        <select class="select" name="role">
+                                            <option value="Admin Lab">Admin</option>
+                                            <option value="Mahasiswa">Mahasiswa</option>
+                                        </select>
+                                    </div>
                                 </div>
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="">Dibuat Pada</label>
+                                        <input type="text" id="createdOn" readonly>
+                                    </div>
+                                </div>                                
                             </div>
-                        </div>
-                        <div class="col-lg-12">
-                            <a href="javascript:void(0);" class="btn btn-submit me-2">Submit</a>
-                            <a href="userlist.html" class="btn btn-cancel">Cancel</a>
-                        </div>
+                            <div class="col-lg-12">
+                                <button type="submit" class="btn btn-submit me-2", href="{{ url_for('user_routes.get_userlist') }}">Update</button>
+                                <a class="btn btn-cancel" href="{{ url_for('user_routes.get_userlist') }}">Cancel</a>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="static/js/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
 
-    <script src="static/js/feather.min.js"></script>
+    <script src="{{ url_for('static', filename='js/feather.min.js') }}"></script>
 
-    <script src="static/js/jquery.slimscroll.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery.slimscroll.min.js') }}"></script>
 
-    <script src="static/js/jquery.dataTables.min.js"></script>
-    <script src="static/js/dataTables.bootstrap4.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dataTables.bootstrap4.min.js') }}"></script>
 
-    <script src="static/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
-    <script src="static/plugins/select2/js/select2.min.js"></script>
+    <script src="{{ url_for('static', filename='plugins/select2/js/select2.min.js') }}"></script>
 
-    <script src="static/plugins/sweetalert/sweetalert2.all.min.js"></script>
-    <script src="static/plugins/sweetalert/sweetalerts.min.js"></script>
+    <script src="{{ url_for('static', filename='plugins/sweetalert/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='plugins/sweetalert/sweetalerts.min.js') }}"></script>
 
-    <script src="static/js/script.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
 </body>
 </html>

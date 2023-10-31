@@ -16,7 +16,7 @@
                     <a href="javascript:void(0);"><img src="{{ url_for('static', filename='img/icons/users1.svg') }}" alt="img"><span>Pengguna</span> <span class="menu-arrow"></span></a>
                     <ul>
                         <li><a href="{{ url_for('user_routes.get_userlist') }}">Daftar Pengguna</a></li>
-                        <li><a href="adduser.html">Tambah Pengguna</a></li>
+                        <li><a href="{{ url_for('user_routes.add_user') }}">Tambah Pengguna</a></li>
                     </ul>
                 </li>
                 <li class="submenu">
