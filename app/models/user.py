@@ -15,6 +15,6 @@ class User(db.Model):
     self_photo = Column(String)
     card_photo = Column(String)
     student_id = Column(String, unique=True)
-    major = Column(String)
     role = Column(UserRole)
     created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

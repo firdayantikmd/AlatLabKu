@@ -45,70 +45,77 @@
                 </div>
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label>Nama Produk</label>
-                                    <input type="text">
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label>Kategori</label>
-                                    <select class="select">
-                                        <option>Alat</option>
-                                        <option>Komponen</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label>Tempat Barang</label>
-                                    <input type="text">
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Jumlah</label>
-                                    <div class="input-group">
-                                        <input type="button" value="-" class="bg-lightred badges dec button">
-                                        <input type="text" name="child" value="0" class="quantity-field">
-                                        <input type="button" value="+" class="bg-lightgreen badges inc button ">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="form-group">
-                                    <label>Detail</label>
-                                    <textarea class="form-control"></textarea>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label>Status</label>
-                                    <select class="select">
-                                        <option>Tersedia</option>
-                                        <option>Tidak Tersedia</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="form-group">
-                                    <label>Gambar Produk</label>
-                                    <div class="image-upload">
-                                        <input type="file">
-                                        <div class="image-uploads">
-                                            <img src="static/img/icons/upload.svg" alt="img">
-                                            <h4>Drag and drop a file to upload</h4>
+                        <form action="{{ url_for('product_routes.add_product') }}" method="post" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Gambar Produk</label>
+                                        <!-- <div class="image-upload">
+                                            <input type="file">
+                                            <div class="image-uploads">
+                                                <img src="static/img/icons/upload.svg" alt="img">
+                                                <h4>Drag and drop a file to upload</h4>
+                                            </div>
+                                        </div> -->
+                                        <div class="product-list">
+                                            <ul class="row">
+                                                <li>
+                                                    <div class="productviews">
+                                                        <div class="productviewsimg">
+                                                            <img id="productImageDisplay" src="{{ url_for('static', filename='img/icons/defaultproductimage.png') }}" alt="Product Image">
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            </ul>
                                         </div>
+                                        <div class="image-upload" name="product_image">
+                                            <input type="file" name="product_image" onchange="previewImage(this, 'productImageDisplay')">
+                                            <div class="image-uploads">
+                                                <img src="{{ url_for('static', filename='img/icons/upload.svg') }}" alt="img">
+                                                <h4>Drag and drop a file to upload</h4>
+                                            </div>
+                                        </div> 
                                     </div>
                                 </div>
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Nama Produk</label>
+                                        <input type="text" name="product_name">
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Kategori</label>
+                                        <select class="select" name="category">
+                                            <option>Bahan</option>
+                                            <option>Alat</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Tempat Barang</label>
+                                        <input type="text" name="storage">
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>Jumlah</label>
+                                        <input type="text" name="stock">
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label>Detail</label>
+                                        <textarea class="form-control" name="details"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <button type="submit" class="btn btn-submit me-2", href="{{ url_for('product_routes.get_productlist') }}">Submit</button>
+                                    <a class="btn btn-cancel" href="{{ url_for('product_routes.get_productlist') }}">Cancel</a>
+                                </div>
                             </div>
-                            <div class="col-lg-12">
-                                <a href="javascript:void(0);" class="btn btn-submit me-2">Submit</a>
-                                <a href="productlist.html" class="btn btn-cancel">Cancel</a>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -132,6 +139,22 @@
     <script src="static/plugins/sweetalert/sweetalerts.min.js"></script>
 
     <script src="static/js/script.js"></script>
+
+    <script>
+        function previewImage(input, imgId) {
+            var file = input.files[0];
+            if (file) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    document.getElementById(imgId).src = e.target.result;
+                }
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+    </script>
 
 </body>
 </html>

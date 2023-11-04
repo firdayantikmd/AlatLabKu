@@ -2,7 +2,6 @@ from sqlalchemy import Column, Integer, String, Enum, DateTime, func
 from database import db
 
 ProductType = Enum('Bahan', 'Alat', name="product_type")
-ProductStatus = Enum('Tersedia', 'Tidak Tersedia', name='product_status')
 
 class Product(db.Model):
     __tablename__ = 'products'
@@ -12,7 +11,7 @@ class Product(db.Model):
     product_image = Column(String)
     category = Column(ProductType)
     storage = Column(String)
-    created_at = Column(DateTime, default=func.now())
-    stock = Column(Integer)
+    stock = Column(Integer, default=0)
     details = Column(String)
-    status = Column(ProductStatus)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

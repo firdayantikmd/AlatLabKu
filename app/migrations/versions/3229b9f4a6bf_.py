@@ -29,7 +29,6 @@ def upgrade():
     sa.Column('ktm_photo', sa.String(), nullable=True),
     sa.Column('ktp_photo', sa.String(), nullable=True),
     sa.Column('student_id', sa.String(), nullable=True),
-    sa.Column('major', sa.String(), nullable=True),
     sa.Column('role', sa.Enum('Mahasiswa', 'Admin Lab', name='user_role'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),

@@ -8,8 +8,8 @@
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="{{ url_for('static', filename='img/icons/product.svg') }}" alt="img"><span>Produk</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="productlist.html">Daftar Produk</a></li>
-                        <li><a href="addproduct.html">Tambah Produk</a></li>
+                        <li><a href="{{ url_for('product_routes.get_productlist') }}">Daftar Produk</a></li>
+                        <li><a href="{{ url_for('product_routes.add_product') }}">Tambah Produk</a></li>
                     </ul>
                 </li>
                 <li class="submenu">

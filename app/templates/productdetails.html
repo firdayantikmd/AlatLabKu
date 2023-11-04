@@ -10,22 +10,22 @@
 
     <title>AlatLabKu</title>
 
-    <link rel="shortcut icon" type="image/x-icon" href="static/img/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo-small.png') }}">
 
-    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 
-    <link rel="stylesheet" href="static/css/animate.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animate.css') }}">
 
-    <link rel="stylesheet" href="static/plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/select2/css/select2.min.css') }}">
 
-    <link rel="stylesheet" href="static/plugins/owlcarousel/owl.carousel.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/owlcarousel/owl.carousel.min.css') }}">
 
-    <link rel="stylesheet" href="static/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dataTables.bootstrap4.min.css') }}">
 
-    <link rel="stylesheet" href="static/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="static/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome/css/fontawesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome/css/all.min.css') }}">
 
-    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
@@ -41,46 +41,52 @@
             <div class="content">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Edit Produk</h4>
-                        <h6>Update Produk</h6>
+                        <h4>Detail Produk</h4>
+                        <h6>Detail Lengkap Produk</h6>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-8 col-sm-12">
                         <div class="card">
                             <div class="card-body">
-                                <div class="productdetails">
-                                    <ul class="product-bar">
-                                        <li>
-                                            <h4>Produk</h4>
-                                            <h6>Aduino</h6>
-                                        </li>
-                                        <li>
-                                            <h4>Kategori</h4>
-                                            <h6>Komponen</h6>
-                                        </li>
-                                        <li>
-                                            <h4>Tempat Barang</h4>
-                                            <h6>Lemari 1</h6>
-                                        </li>
-                                        <li>
-                                            <h4>Ditambahkan Pada</h4>
-                                            <h6>11 Oktober 2023</h6>
-                                        </li>
-                                        <li>
-                                            <h4>Stok</h4>
-                                            <h6>100</h6>
-                                        </li>
-                                        <li>
-                                            <h4>Detail</h4>
-                                            <h6>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,</h6>
-                                        </li>
-                                        <li>
-                                            <h4>Status</h4>
-                                            <h6>Tersedia</h6>
-                                        </li>
-                                    </ul>
-                                </div>
+                                <form action="{{ url_for('product_routes.product_details', id=product.id) }}" method="get">
+                                    <div class="productdetails">
+                                        <ul class="product-bar">
+                                            <li>
+                                                <h4>Produk</h4>
+                                                <h6>{{ product.product_name }}</h6>
+                                            </li>
+                                            <li>
+                                                <h4>Kategori</h4>
+                                                <h6>{{ product.category }}</h6>
+                                            </li>
+                                            <li>
+                                                <h4>Tempat Barang</h4>
+                                                <h6>{{ product.storage }}</h6>
+                                            </li>
+                                            <li>
+                                                <h4>Stok</h4>
+                                                <h6>{{ product.stock }}</h6>
+                                            </li>
+                                            <li>
+                                                <h4>Detail</h4>
+                                                <h6>{{ product.details }}</h6>
+                                            </li>
+                                            <li>
+                                                <h4>Status</h4>
+                                                <h6>{% if product.stock and product.stock > 0 %}Tersedia{% else %}Tidak Tersedia{% endif %}</h6>
+                                            </li>
+                                            <li>
+                                                <h4>Ditambahkan Pada</h4>
+                                                <h6>{{ product.created_at.strftime('%d %B %Y') }}</h6>
+                                            </li>
+                                            <li>
+                                                <h4>Diperbaharui Pada</h4>
+                                                <h6>{{ product.updated_at.strftime('%d %B %Y') }}</h6>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -90,14 +96,7 @@
                                 <div class="slider-product-details">
                                     <div class="owl-carousel owl-theme product-slide">
                                         <div class="slider-product">
-                                            <img src="static/img/product/product69.jpg" alt="img">
-                                            <h4>arduino.jpg</h4>
-                                            <h6>581kb</h6>
-                                        </div>
-                                        <div class="slider-product">
-                                            <img src="static/img/product/product69.jpg" alt="img">
-                                            <h4>arduino.jpg</h4>
-                                            <h6>581kb</h6>
+                                            <img src="{{ url_for('static', filename=product.product_image[7:]) }}" alt="Product Image">
                                         </div>
                                     </div>
                                 </div>
@@ -109,19 +108,19 @@
         </div>
     </div>
 
-    <script src="static/js/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
 
-    <script src="static/js/feather.min.js"></script>
+    <script src="{{ url_for('static', filename='js/feather.min.js') }}"></script>
 
-    <script src="static/js/jquery.slimscroll.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery.slimscroll.min.js') }}"></script>
 
-    <script src="static/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
-    <script src="static/plugins/owlcarousel/owl.carousel.min.js"></script>
+    <script src="{{ url_for('static', filename='plugins/owlcarousel/owl.carousel.min.js') }}"></script>
 
-    <script src="static/plugins/select2/js/select2.min.js"></script>
+    <script src="{{ url_for('static', filename='plugins/select2/js/select2.min.js') }}"></script>
 
-    <script src="static/js/script.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
 </body>
 </html>
