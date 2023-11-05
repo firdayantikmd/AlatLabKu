@@ -1,7 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from models.product import Product, ProductType
 from database import db
-from werkzeug.security import generate_password_hash, check_password_hash
 
 import os
 from werkzeug.utils import secure_filename
@@ -26,6 +25,7 @@ def add_product():
     elif request.method == 'POST':
         product_name = request.form.get('product_name')
         product_image_file = request.files.get('product_image')
+        code = request.form.get('code')
         category = request.form.get('category', 'Bahan')
         storage = request.form.get('storage')
         stock = request.form.get('stock')
@@ -39,16 +39,17 @@ def add_product():
             product_image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             product_image_file.save(product_image_path)
 
-        product_by_product_name = Product.query.filter_by(product_name=product_name).first()
+        product_by_code = Product.query.filter_by(code=code).first()
 
-        if product_by_product_name:
-            flash('Product name already exists. Choose another one.')
+        if product_by_code:
+            flash('Product code already exists. Choose another one.')
             return redirect(url_for('product_routes.add_product'))
 
         # Store product details in database
         new_product = Product(
             product_name=product_name,
             product_image=product_image_path,
+            code=code,
             category=category,
             storage=storage,
             stock=stock,
@@ -110,12 +111,14 @@ def editproduct(id):
     
     if request.method == 'POST':
         product_name = request.form.get('product_name')
+        code = request.form.get('code')
         category =  request.form.get('category')
         storage = request.form.get('storage')
         stock = request.form.get('stock')
         details = request.form.get('details')
 
         product.product_name = product_name if product_name else product.product_name
+        product.code = code if code else product.code
         product.category = category
         product.storage = storage
         product.stock = stock

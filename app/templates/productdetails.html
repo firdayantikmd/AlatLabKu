@@ -70,7 +70,7 @@
                                             </li>
                                             <li>
                                                 <h4>Detail</h4>
-                                                <h6>{{ product.details }}</h6>
+                                                <h6><td>{{ product.details|replace("\n", "<br>")|safe }}</td></h6>
                                             </li>
                                             <li>
                                                 <h4>Status</h4>

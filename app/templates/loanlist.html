@@ -10,9 +10,9 @@
 
     <title>AlatLabKu</title>
 
-    <link rel="shortcut icon" type="image/x-icon" href="static/img/favicon.png">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo-small.png') }}">
 
-    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 
     <link rel="stylesheet" href="static/css/animate.css">
 
@@ -32,6 +32,7 @@
     </div>
 
     <div class="main-wrapper">
+        
         {% include 'navbar.html' %}
         {% include 'sidebar.html' %}
 
@@ -42,67 +43,36 @@
                         <h4>Daftar Peminjaman</h4>
                         <h6>Kelola Peminjaman</h6>
                     </div>
+                    <!-- Flash messages for feedback -->
                     <div class="page-btn">
                         <a href="addloan.html" class="btn btn-added"><img src="static/img/icons/plus.svg" alt="img" class="me-1">Ajukan Peminjaman</a>
                     </div>
                 </div>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="alerts">
+                        {% for message in messages %}
+                            <div class="alert alert-info">{{ message }}</div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
                 <div class="card">
                     <div class="card-body">
                         <div class="table-top">
                             <div class="search-set">
-                                <div class="search-path">
-                                    <a class="btn btn-filter" id="filter_search">
-                                        <img src="static/img/icons/filter.svg" alt="img">
-                                        <span><img src="static/img/icons/closes.svg" alt="img"></span>
-                                    </a>
-                                </div>
                                 <div class="search-input">
                                     <a class="btn btn-searchset"><img src="static/img/icons/search-white.svg" alt="img"></a>
                                 </div>
-                            </div>
-                            <div class="wordset">
-                                <ul>
-                                    <li>
-                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="pdf"><img src="static/img/icons/pdf.svg" alt="img"></a>
-                                    </li>
-                                    <li>
-                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="excel"><img src="static/img/icons/excel.svg" alt="img"></a>
-                                    </li>
-                                    <li>
-                                        <a data-bs-toggle="tooltip" data-bs-placement="top" title="print"><img src="static/img/icons/printer.svg" alt="img"></a>
-                                    </li>
-                                </ul>
                             </div>
                         </div>
                         
                         <div class="card mb-0" id="filter_inputs">
                             <div class="card-body pb-0">
                                 <div class="row">
-                                    <div class="col-lg-12 col-sm-12">
-                                        <div class="row">
-                                            <div class="col-lg col-sm-6 col-12">
-                                                <div class="form-group">
-                                                    <select class="select">
-                                                        <option>Choose Nama</option>
-                                                        <option>Macbook pro</option>
-                                                        <option>Orange</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg col-sm-6 col-12">
-                                                <div class="form-group">
-                                                    <select class="select">
-                                                        <option>Choose NIM</option>
-                                                        <option>Computers</option>
-                                                        <option>Fruits</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-1 col-sm-6 col-12">
-                                                <div class="form-group">
-                                                    <a class="btn btn-filters ms-auto"><img src="static/img/icons/search-whites.svg" alt="img"></a>
-                                                </div>
-                                            </div>
+                                    <div class="col-lg-2 col-sm-6 col-12">
+                                        <div class="form-group">
+                                            <input type="text" name="" id="">
                                         </div>
                                     </div>
                                 </div>
@@ -113,123 +83,34 @@
                             <table class="table  datanew">
                                 <thead>
                                     <tr>
-                                    <th>
-                                        <label class="checkboxs">
-                                            <input type="checkbox" id="select-all">
-                                            <span class="checkmarks"></span>
-                                        </label>
-                                    </th>
                                     <th>Nama Peminjam</th>
                                     <th>NIM</th>
                                     <th>Nama Barang</th>
+                                    <th>Kode Barang</th>
                                     <th>Jumlah</th>
-                                    <th>Tanggal Update</th>
                                     <th>Status Peminjaman</th>
+                                    <th>Ditambahkan Pada</th>
+                                    <th>Diperbaharui Pada</th>
                                     <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    {% for loan in loans %}
                                     <tr>
+                                        <td>{{ loan.user.full_name }}</td>
+                                        <td>{{ loan.user.student_id }}</td>
+                                        <td>{{ loan.product.product_name }}</td>
+                                        <td>{{ loan.product.code }}</td>
+                                        <td>{{ loan.quantity }}</td>
+                                        <td><span class="bg-lightyellow badges">{{ loan.status.value }}</span></td>
+                                        <td>{{ loan.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                        <td>{{ loan.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                         <td>
-                                            <label class="checkboxs">
-                                                <input type="checkbox">
-                                                <span class="checkmarks"></span>
-                                            </label>
-                                        </td>
-                                        <td>Firdayanti</td>
-                                        <td>J0304201069</td>
-                                        <td>Arduino</td>
-                                        <td>1</td>
-                                        <td>11 Oktober 2023</td>
-                                        <td><span class="bg-lightyellow badges">Menunggu Konfirmasi</span></td>
-                                        <td>
-                                            <a class="me-3" width=100% href="javascript:void(0);">
-                                                <img src="static/img/icons/return.svg" alt="img">
-                                            </a>
-                                            <a class="me-3" href="editloan.html">
-                                                <img src="static/img/icons/edit.svg" alt="img">
-                                            </a>
-                                            <a class="confirm-text" href="javascript:void(0);">
-                                                <img src="static/img/icons/delete.svg" alt="img">
-                                            </a>
+                                            <!-- Your action links/buttons go here -->
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td>
-                                            <label class="checkboxs">
-                                                <input type="checkbox">
-                                                <span class="checkmarks"></span>
-                                            </label>
-                                        </td>
-                                        <td>Firdayanti</td>
-                                        <td>J0304201069</td>
-                                        <td>Arduino</td>
-                                        <td>1</td>
-                                        <td>11 Oktober 2023</td>
-                                        <td><span class="bg-lightgreen badges">Disetujui</span></td>
-                                        <td>
-                                            <a class="me-3" width=100% href="javascript:void(0);">
-                                                <img src="static/img/icons/return.svg" alt="img">
-                                            </a>
-                                            <a class="me-3" href="editloan.html">
-                                                <img src="static/img/icons/edit.svg" alt="img">
-                                            </a>
-                                            <a class="confirm-text" href="javascript:void(0);">
-                                                <img src="static/img/icons/delete.svg" alt="img">
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label class="checkboxs">
-                                                <input type="checkbox">
-                                                <span class="checkmarks"></span>
-                                            </label>
-                                        </td>
-                                        <td>Firdayanti</td>
-                                        <td>J0304201069</td>
-                                        <td>Arduino</td>
-                                        <td>1</td>
-                                        <td>11 Oktober 2023</td>
-                                        <td><span class="bg-lightred badges">Ditolak</span></td>
-                                        <td>
-                                            <a class="me-3" width=100% href="javascript:void(0);">
-                                                <img src="static/img/icons/return.svg" alt="img">
-                                            </a>
-                                            <a class="me-3" href="editloan.html">
-                                                <img src="static/img/icons/edit.svg" alt="img">
-                                            </a>
-                                            <a class="confirm-text" href="javascript:void(0);">
-                                                <img src="static/img/icons/delete.svg" alt="img">
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label class="checkboxs">
-                                                <input type="checkbox">
-                                                <span class="checkmarks"></span>
-                                            </label>
-                                        </td>
-                                        <td>Firdayanti</td>
-                                        <td>J0304201069</td>
-                                        <td>Arduino</td>
-                                        <td>1</td>
-                                        <td>11 Oktober 2023</td>
-                                        <td><span class="bg-lightgrey badges">Sedang Dipinjam</span></td>
-                                        <td>
-                                            <a class="me-3" width=100% href="javascript:void(0);">
-                                                <img src="static/img/icons/return.svg" alt="img">
-                                            </a>
-                                            <a class="me-3" href="editloan.html">
-                                                <img src="static/img/icons/edit.svg" alt="img">
-                                            </a>
-                                            <a class="confirm-text" href="javascript:void(0);">
-                                                <img src="static/img/icons/delete.svg" alt="img">
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
+                                    {% endfor %}
+                                </tbody>  
                             </table>
                         </div>
                     </div>

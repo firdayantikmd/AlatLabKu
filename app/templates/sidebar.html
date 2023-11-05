@@ -22,8 +22,8 @@
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="{{ url_for('static', filename='img/icons/transfer1.svg') }}" alt="img"><span>Peminjaman</span> <span class="menu-arrow"></span></a>
                     <ul>
-                        <li><a href="loanlist.html">Daftar Peminjaman</a></li>
-                        <li><a href="addloan.html">Ajukan Peminjaman</a></li>
+                        <li><a href="{{ url_for('loan_routes.get_loanlist') }}">Daftar Peminjaman</a></li>
+                        <li><a href="{{ url_for('loan_routes.add_loan') }}">Ajukan Peminjaman</a></li>
                     </ul>
                 </li>
                 <li class="submenu">

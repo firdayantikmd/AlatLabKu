@@ -105,6 +105,7 @@
                                     <tr>
                                     <th>Foto Produk</th>
                                     <th>Nama Produk</th>
+                                    <th>Kode Produk</th>
                                     <th>Kategori</th>
                                     <th>Tempat Barang</th>
                                     <th>Stok</th>
@@ -124,10 +125,11 @@
                                                 </a>
                                             </td>
                                             <td>{{ product.product_name }}</td>
+                                            <td>{{ product.code }}</td>
                                             <td>{{ product.category }}</td>
                                             <td>{{ product.storage }}</td>
                                             <td>{{ product.stock }}</td>
-                                            <td>{{ product.details }}</td>
+                                            <td>{{ product.details|replace("\n", "<br>")|safe }}</td>
                                             <td>
                                                 {% if product.stock and product.stock > 0 %}
                                                     <span class="bg-lightgreen badges">Tersedia</span>
@@ -176,7 +178,6 @@
     <script src="static/plugins/sweetalert/sweetalerts.min.js"></script>
 
     <script src="static/js/script.js"></script>
-
 
     <script>
         function confirmDelete(deleteUrl) {

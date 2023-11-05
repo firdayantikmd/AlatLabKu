@@ -60,6 +60,7 @@ def signin():
             flash('Incorrect email or password. Please try again.')
             return redirect(url_for('user_routes.signin'))
 
+        session['user_id'] = user.id
         session['username'] = user.username
 
         flash('Login successful!')
@@ -110,10 +111,10 @@ def add_user():
         password = request.form.get('password')
         full_name = request.form.get('full_name')
         student_id = request.form.get('student_id')
+        role = request.form.get('role', 'Mahasiswa')
         no_hp = request.form.get('no_hp')
         self_photo_file = request.files.get('self_photo')
         card_photo_file = request.files.get('card_photo')
-        role = request.form.get('role', 'Mahasiswa')
 
         self_photo_path = None
         card_photo_path = None
@@ -151,10 +152,10 @@ def add_user():
             password=generate_password_hash(password, method='pbkdf2:sha256'),
             full_name=full_name,
             student_id=student_id,
+            role=role,
             no_hp=no_hp,
             self_photo=self_photo_path,
-            card_photo=card_photo_path,
-            role=role  # you might need to ensure this matches the UserRole enum
+            card_photo=card_photo_path
         )
         db.session.add(new_user)
         db.session.commit()
@@ -190,12 +191,14 @@ def edituser(id):
         email = request.form.get('email')
         full_name = request.form.get('full_name')
         student_id = request.form.get('student_id')
+        role = request.form.get('role', 'Mahasiswa')
         no_hp = request.form.get('no_hp')
 
         user.username = username
         user.email = email
         user.full_name = full_name if full_name else user.full_name
         user.student_id = student_id if student_id else user.student_id
+        user.role = role if role else user.role
         user.no_hp = no_hp if no_hp else user.no_hp
 
         self_photo_file = request.files.get('self_photo')

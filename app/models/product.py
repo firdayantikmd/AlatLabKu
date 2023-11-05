@@ -9,6 +9,7 @@ class Product(db.Model):
     id = Column(Integer, primary_key=True)
     product_name = Column(String)
     product_image = Column(String)
+    code = Column(String)
     category = Column(ProductType)
     storage = Column(String)
     stock = Column(Integer, default=0)
