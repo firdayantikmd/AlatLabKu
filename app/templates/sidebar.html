@@ -27,11 +27,8 @@
                     </ul>
                 </li>
                 <li class="submenu">
-                    <a href="javascript:void(0);"><img src="{{ url_for('static', filename='img/icons/return1.svg') }}" alt="img"><span>Pengembalian</span> <span class="menu-arrow"></span></a>
-                    <ul>
-                        <li><a href="returnlist.html">Daftar Pengembalian</a></li>
-                        <li><a href="loanlist.html">Ajukan Pengembalian</a></li>
-                    </ul>
+                    <a href="javascript:void(0);"><img src="{{ url_for('static', filename='img/icons/return1.svg') }}" alt="img"><span>Pengembalian</span></a>
+                    <li><a href="{{ url_for('return_routes.get_returnlist') }}">Daftar Pengembalian</a></li>
                 </li>
                 <li class="submenu">
                     <a href="javascript:void(0);"><img src="{{ url_for('static', filename='img/icons/report.svg') }}" alt="img"><span>Laporan</span> <span class="menu-arrow"></span></a>
@@ -56,3 +53,4 @@
         </div>
     </div>
 </div>
+

@@ -44,9 +44,9 @@
                         <h6>Kelola Peminjaman</h6>
                     </div>
                     <!-- Flash messages for feedback -->
-                    <div class="page-btn">
-                        <a href="addloan.html" class="btn btn-added"><img src="static/img/icons/plus.svg" alt="img" class="me-1">Ajukan Peminjaman</a>
-                    </div>
+                    <a href="{{ url_for('loan_routes.add_loan') }}" class="btn btn-added">
+                        <img src="{{ url_for('static', filename='img/icons/plus.svg') }}" alt="img" class="me-1">Ajukan Peminjaman
+                    </a>
                 </div>
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}
@@ -102,11 +102,37 @@
                                         <td>{{ loan.product.product_name }}</td>
                                         <td>{{ loan.product.code }}</td>
                                         <td>{{ loan.quantity }}</td>
-                                        <td><span class="bg-lightyellow badges">{{ loan.status.value }}</span></td>
+                                        <td>
+                                            {% if loan.status == LoanStatus.CONFIRM %}
+                                                <span class="badge bg-info">{{ loan.status.value }}</span>
+                                            {% elif loan.status == LoanStatus.ACCEPTED %}
+                                                <span class="badge bg-success">{{ loan.status.value }}</span>
+                                            {% elif loan.status == LoanStatus.REJECTED %}
+                                                <span class="badge bg-danger">{{ loan.status.value }}</span>
+                                            {% elif loan.status == LoanStatus.ON_LOAN %}
+                                                <span class="badge bg-warning text-dark">{{ loan.status.value }}</span>
+                                            {% elif loan.status == LoanStatus.PARTIALLY_RETURNED %}
+                                                <span class="badge bg-secondary">{{ loan.status.value }}</span>
+                                            {% elif loan.status == LoanStatus.RETURNED %}
+                                                <span class="badge bg-primary">{{ loan.status.value }}</span>
+                                            {% elif loan.status == LoanStatus.FINISHED %}
+                                                <span class="badge bg-dark">{{ loan.status.value }}</span>
+                                            {% else %}
+                                                <span class="badge bg-light">{{ loan.status.value }}</span>
+                                            {% endif %}
+                                        </td>                                        
                                         <td>{{ loan.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                         <td>{{ loan.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                         <td>
-                                            <!-- Your action links/buttons go here -->
+                                            <a class="me-3" href="{{ url_for('return_routes.add_return', loan_id=loan.id) }}" title="Return Loan">
+                                                <img src="{{ url_for('static', filename='img/icons/return.svg') }}" alt="Return">
+                                            </a>
+                                            <a class="me-3" href="{{ url_for('loan_routes.edit_loan', loan_id=loan.id) }}">
+                                                <img src="static/img/icons/edit.svg" alt="img">
+                                            </a>                                                                    
+                                            <a class="me-3" href="javascript:void(0);" onclick="confirmDelete('{{ url_for('loan_routes.delete_loan', loan_id=loan.id) }}')">
+                                                <img src="static/img/icons/delete.svg" alt="img">
+                                            </a> 
                                         </td>
                                     </tr>
                                     {% endfor %}
@@ -136,6 +162,50 @@
     <script src="static/plugins/sweetalert/sweetalerts.min.js"></script>
 
     <script src="static/js/script.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Confirm return action
+            $(".confirm-return").on("click", function(e) {
+                e.preventDefault();
+                let url = $(this).attr('href');
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you want to return this loan?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, return it!',
+                    cancelButtonText: 'No, cancel!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    }
+                });
+            });
+    
+            // ... you can add similar logic for delete action here ...
+    
+        });
+        
+    </script> 
+
+    <script>
+        function confirmDelete(deleteUrl) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl;
+                }
+            });
+        }
+    </script>
 
 </body>
 </html>

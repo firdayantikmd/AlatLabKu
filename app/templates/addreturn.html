@@ -39,57 +39,58 @@
             <div class="content">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Edit Return Item</h4>
-                        <h6>Update Return Item</h6>
+                        <h4>Tambah Pengembalian</h4>
+                        <h6>Daftarkan Pengembalian Baru</h6>
                     </div>
                 </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="flashes">
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ url_for('return_routes.edit_return', id=r.id) }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ url_for('return_routes.add_return', loan_id=loan.id) }}" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="_method" value="PUT">
                             <div class="row">
                                 <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
                                         <label for="">Nama Peminjam</label>
-                                        <input type="text" name="full_name" value="{{ r.user.full_name }}" readonly>
+                                        <input type="text" name="full_name" value="{{ full_name | default('') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
                                         <label>NIM</label>
-                                        <input type="text" name="student_id" value="{{ r.user.student_id }}" readonly>
+                                        <input type="text" name="student_id" value="{{ student_id | default('') }}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
                                         <label for="">Nama Barang</label>
-                                        <input type="text" name="product_name" value="{{ r.product.product_name }}" readonly>
+                                        <input type="text" name="product_name" value="{{ loan.product.product_name }}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
                                         <label for="">Kode Barang</label>
-                                        <input type="text" name="code" value="{{ r.product.code }}" readonly>
+                                        <input type="text" name="code" value="{{ loan.product.code }}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-lg-3 col-sm-6 col-12">
                                     <div class="form-group">
-                                        <label for="">Status</label>
-                                        <select name="status" class="select">
-                                            {% for status in ReturnStatus %}
-                                                <option value="{{ status.name }}" {% if r.status.name == status.name %}selected{% endif %}>{{ status.value }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>                                
-                                <div class="col-lg-3 col-sm-6 col-12">
-                                    <div class="form-group">
-                                        <label for="quantity">Jumlah</label>
-                                        <input type="number" name="returned_quantity" value="{{ r.returned_quantity }}" class="form-control" readonly>
+                                        <label for="returned_quantity">Jumlah</label>
+                                        <input type="number" name="returned_quantity" id="returned_quantity" value="1" min="1" class="form-control">
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
-                                    <button type="submit" class="btn btn-submit me-2", href="{{ url_for('return_routes.get_returnlist') }}">Update</button>
+                                    <button type="submit" class="btn btn-submit me-2" href="{{ url_for('return_routes.get_returnlist') }}">Submit</button>
                                     <a class="btn btn-cancel" href="{{ url_for('return_routes.get_returnlist') }}">Cancel</a>
                                 </div>
                             </div>
@@ -117,6 +118,24 @@
     <script src="{{ url_for('static', filename='plugins/sweetalert/sweetalert.min.js') }}"></script>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+    <script>
+        // Example of JavaScript for form submission with validation
+        $(document).ready(function() {
+            $('#returnForm').on('submit', function(e) {
+                e.preventDefault();
+                var isValid = true; // Perform your validation logic here
+
+                if(isValid) {
+                    var formData = $(this).serialize();
+                    // Perform AJAX submission here if needed
+                    console.log('Form is valid and ready for submission: ', formData);
+                } else {
+                    console.log('Form is not valid.');
+                }
+            });
+        });
+    </script>
 
 </body>
 </html>

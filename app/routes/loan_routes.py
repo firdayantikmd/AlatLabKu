@@ -11,7 +11,7 @@ loan_routes = Blueprint('loan_routes', __name__)
 @login_required
 def get_loanlist():
     loans = Loan.query.all()
-    return render_template('loanlist.html', loans=loans)
+    return render_template('loanlist.html', loans=loans, LoanStatus=LoanStatus)
 
 @loan_routes.route('/addloan', methods=['GET', 'POST'])
 @login_required
@@ -55,45 +55,47 @@ def add_loan():
 
     return render_template('addloan.html')
 
-
-@loan_routes.route('/viewloan/<int:loan_id>', methods=['GET'])
-@login_required
-def view_loan(loan_id):
-    loan = Loan.query.get(loan_id)
-    if not loan:
-        flash("Loan not found", "error")
-        return redirect(url_for('loan_routes.get_loanlist'))
-    return render_template('viewloan.html', loan=loan)  # Assuming there's a viewloan.html template
-
 @loan_routes.route('/editloan/<int:loan_id>', methods=['GET', 'POST'])
 @login_required
 def edit_loan(loan_id):
+
     loan = Loan.query.get(loan_id)
+
     if not loan:
         flash("Loan not found", "error")
         return redirect(url_for('loan_routes.get_loanlist'))
 
-    if request.method == 'POST':
-        # Here you'd add logic to update the loan details
-        # For now, I'll just demonstrate updating the quantity
-        quantity = int(request.form.get('quantity'))
-        loan.quantity = quantity
-        db.session.commit()
-        flash("Loan updated successfully", "success")
-        return redirect(url_for('loan_routes.get_loanlist'))
+    if request.method == 'GET':
+        return render_template('editloan.html', loan=loan, LoanStatus=LoanStatus)
 
-    return render_template('editloan.html', loan=loan)  # Assuming there's an editloan.html template
+    if request.method == 'POST':
+        status_str = request.form.get('status')
+
+        # Convert the string value to LoanStatus enum
+        try:
+            status_enum = LoanStatus[status_str]
+            loan.status = status_enum
+        except KeyError:
+            flash("Invalid loan status", "error")
+            return redirect(url_for('loan_routes.edit_loan', loan_id=loan.id))
+
+        db.session.commit()
+
+        flash("Loan updated successfully!", "success")
+        return redirect(url_for('loan_routes.get_loanlist'))
 
 @loan_routes.route('/deleteloan/<int:loan_id>', methods=['POST'])
 @login_required
-def delete_loan(id):
-    loan = Loan.query.get(id)
+def delete_loan(loan_id):
+    loan = Loan.query.get(id=loan_id)
     
-    if loan:
-        db.session.delete(loan)
-        db.session.commit()
-        flash("Loan deleted successfully", "success")
-    else:
+    if not loan:
         flash("Loan not found", "error")
+        return redirect(url_for('loan_routes.get_loanlist'))
+        
+    db.session.delete(loan)
+    db.session.commit()
+        
+    flash("Loan deleted successfully", "success")
     return redirect(url_for('loan_routes.get_loanlist'))
 

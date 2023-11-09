@@ -99,7 +99,7 @@ def signout():
 
 #     return render_template('userlist.html', users=users, pagination=pagination)
 
-@user_routes.route('/add_user', methods=['GET', 'POST'])
+@user_routes.route('/adduser', methods=['GET', 'POST'])
 @login_required
 def add_user():
     if request.method == 'GET':
@@ -175,7 +175,7 @@ def get_userlist():
 
 @user_routes.route('/edituser/<int:id>', methods=['GET', 'POST'])
 @login_required
-def edituser(id):
+def edit_user(id):
     # Assuming you have a User model that queries users by id
     user = User.query.get(id)
     
@@ -227,7 +227,7 @@ def edituser(id):
         flash("User updated successfully!", "success")
         return redirect(url_for('user_routes.get_userlist'))
 
-@user_routes.route('/delete_user/<int:id>', methods=['GET', 'POST'])
+@user_routes.route('/deleteuser/<int:id>', methods=['GET', 'POST'])
 @login_required
 def delete_user(id):
     user = User.query.get(id)

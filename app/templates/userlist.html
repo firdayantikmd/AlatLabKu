@@ -114,7 +114,7 @@
                                             <td>{{ user.created_at|default("Date not available", true) }}</td>
                                             <td>{{ user.updated_at|default("Date not available", true) }}</td>
                                             <td>
-                                                <a class="me-3" href="{{ url_for('user_routes.edituser', id=user.id) }}"> <!-- Adjusted for dynamic routing -->
+                                                <a class="me-3" href="{{ url_for('user_routes.edit_user', id=user.id) }}"> <!-- Adjusted for dynamic routing -->
                                                     <img src="{{ url_for('static', filename='img/icons/edit.svg') }}" alt="edit">
                                                 </a>
                                                 <a class="me-3" href="javascript:void(0);" onclick="confirmDelete('{{ url_for('user_routes.delete_user', id=user.id) }}')">

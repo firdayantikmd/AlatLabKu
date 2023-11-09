@@ -9,5 +9,7 @@ COPY . .
 
 COPY entrypoint.sh /entrypoint.sh
 
+ENV FLASK_ENV development
+
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["python", "run.py"]
+CMD ["python", "-u", "run.py"]

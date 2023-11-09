@@ -10,20 +10,20 @@
 
     <title>AlatLabKu</title>
 
-    <link rel="shortcut icon" type="image/x-icon" href="static/img/logo-small.png">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='img/logo-small.png') }}">
 
-    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
 
-    <link rel="stylesheet" href="static/css/animate.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/animate.css') }}">
 
-    <link rel="stylesheet" href="static/plugins/select2/css/select2.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/select2/css/select2.min.css') }}">
 
-    <link rel="stylesheet" href="static/css/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dataTables.bootstrap4.min.css') }}">
 
-    <link rel="stylesheet" href="static/plugins/fontawesome/css/fontawesome.min.css">
-    <link rel="stylesheet" href="static/plugins/fontawesome/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome/css/fontawesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='plugins/fontawesome/css/all.min.css') }}">
 
-    <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 
 <body>
@@ -45,80 +45,78 @@
                 </div>
                 <div class="card">
                     <div class="card-body">
-                        <div class="row">
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Nama Peminjam</label>
-                                    <input type="text" value="Firdayanti">
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">NIM</label>
-                                    <input type="text" value="J0304201069">
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Nama Barang</label>
-                                    <input type="text" value="Arduino">
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Jumlah</label>
-                                    <div class="input-group">
-                                        <input type="button" value="-" class="bg-lightred badges dec button">
-                                        <input type="text" name="child" value="0" class="quantity-field">
-                                        <input type="button" value="+" class="bg-lightgreen badges inc button ">
+                        <form action="{{ url_for('loan_routes.edit_loan', loan_id=loan.id) }}" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="_method" value="PUT">
+                            <div class="row">
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="">Nama Peminjam</label>
+                                        <input type="text" name="full_name" value="{{ loan.user.full_name }}" readonly>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Tanggal Update</label>
-                                    <input type="text" value="11 Oktober 2023">
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label>NIM</label>
+                                        <input type="text" name="student_id" value="{{ loan.user.student_id }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="">Nama Barang</label>
+                                        <input type="text" name="product_name" value="{{ loan.product.product_name }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="">Kode Barang</label>
+                                        <input type="text" name="code" value="{{ loan.product.code }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="">Status</label>
+                                        <select name="status" class="select">
+                                            {% for status in LoanStatus %}
+                                                <option value="{{ status.name }}" {% if loan.status.name == status.name %}selected{% endif %}>{{ status.value }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>                                
+                                <div class="col-lg-3 col-sm-6 col-12">
+                                    <div class="form-group">
+                                        <label for="quantity">Jumlah</label>
+                                        <input type="number" name="quantity" value="{{ loan.quantity }}" class="form-control" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
+                                    <button type="submit" class="btn btn-submit me-2", href="{{ url_for('loan_routes.get_loanlist') }}">Update</button>
+                                    <a class="btn btn-cancel" href="{{ url_for('loan_routes.get_loanlist') }}">Cancel</a>
                                 </div>
                             </div>
-                            <div class="col-lg-3 col-sm-6 col-12">
-                                <div class="form-group">
-                                    <label for="">Status Peminjaman</label>
-                                    <select class="select">
-                                        <option>Menunggu Konfirmasi</option>
-                                        <option>Disetujui</option>
-                                        <option>Ditolak</option>
-                                        <option>Sedang Dipinjam</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <a href="javascript:void(0);" class="btn btn-submit me-2">Update</a>
-                                <a href="loanlist.html" class="btn btn-cancel">Cancel</a>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="static/js/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
 
-    <script src="static/js/feather.min.js"></script>
+    <script src="{{ url_for('static', filename='js/feather.min.js') }}"></script>
 
-    <script src="static/js/jquery.slimscroll.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery.slimscroll.min.js') }}"></script>
 
-    <script src="static/js/jquery.dataTables.min.js"></script>
-    <script src="static/js/dataTables.bootstrap4.min.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dataTables.bootstrap4.min.js') }}"></script>
 
-    <script src="static/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
-    <script src="static/plugins/select2/js/select2.min.js"></script>
+    <script src="{{ url_for('static', filename='plugins/select2/js/select2.min.js') }}"></script>
+    
+    <script src="{{ url_for('static', filename='plugins/sweetalert/sweetalert2.all.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='plugins/sweetalert/sweetalert.min.js') }}"></script>
 
-    <script src="static/plugins/sweetalert/sweetalert2.all.min.js"></script>
-    <script src="static/plugins/sweetalert/sweetalerts.min.js"></script>
-
-    <script src="static/js/script.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
 </body>
 </html>

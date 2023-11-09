@@ -1,6 +1,6 @@
 from flask import Flask
 from database import init_db
-from routes import user_routes, base_routes, product_routes, loan_routes
+from routes import user_routes, base_routes, product_routes, loan_routes, return_routes
 
 import models
 
@@ -15,6 +15,7 @@ app.register_blueprint(user_routes)
 app.register_blueprint(base_routes)
 app.register_blueprint(product_routes)
 app.register_blueprint(loan_routes)
+app.register_blueprint(return_routes)
 
 if __name__ == "__main__":
     app.run(debug=True)
