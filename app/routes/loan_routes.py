@@ -38,15 +38,9 @@ def add_loan():
             flash("Not enough stock available", "danger")
             return redirect(url_for('loan_routes.add_loan'))
         
-        existing_loan = Loan.query.filter_by(user_id=user.id, product_id=product.id).first()
-
-        if existing_loan:
-            existing_loan.quantity += quantity
-            product.stock -= quantity
-        else:
-            loan = Loan(user_id=user.id, product_id=product.id, quantity=quantity)
-            product.stock -= quantity
-            db.session.add(loan)
+        loan = Loan(user_id=user.id, product_id=product.id, quantity=quantity)
+        product.stock -= quantity
+        db.session.add(loan)
         
         db.session.commit()
 

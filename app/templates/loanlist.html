@@ -124,9 +124,11 @@
                                         <td>{{ loan.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                         <td>{{ loan.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                         <td>
+                                            {% if loan.status == LoanStatus.ON_LOAN or loan.status == LoanStatus.PARTIALLY_RETURNED %}
                                             <a class="me-3" href="{{ url_for('return_routes.add_return', loan_id=loan.id) }}" title="Return Loan">
                                                 <img src="{{ url_for('static', filename='img/icons/return.svg') }}" alt="Return">
                                             </a>
+                                            {% endif %}
                                             <a class="me-3" href="{{ url_for('loan_routes.edit_loan', loan_id=loan.id) }}">
                                                 <img src="static/img/icons/edit.svg" alt="img">
                                             </a>                                                                    
