@@ -89,6 +89,12 @@
                                     </div>
                                 </div>
                                 <div class="col-lg-12">
+                                    <div class="form-group">
+                                        <label for="note">Catatan</label>
+                                        <textarea class="form-control" name="note" id="note" value="{{ r.note }}">{{ r.note }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-lg-12">
                                     <button type="submit" class="btn btn-submit me-2", href="{{ url_for('return_routes.get_returnlist') }}">Update</button>
                                     <a class="btn btn-cancel" href="{{ url_for('return_routes.get_returnlist') }}">Cancel</a>
                                 </div>

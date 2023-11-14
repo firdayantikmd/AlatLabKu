@@ -1,5 +1,5 @@
 from enum import Enum as PyEnum
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, Enum, func
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Enum, func
 from sqlalchemy.orm import relationship
 from database import db
 
@@ -18,6 +18,7 @@ class Return(db.Model):
     loan_id = Column(Integer, ForeignKey('loans.id'), nullable=False)
     returned_quantity = Column(Integer, nullable=False)
     status = Column(Enum(ReturnStatus), default=ReturnStatus.CONFIRM, nullable=False)
+    note = Column(String, default='')
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 

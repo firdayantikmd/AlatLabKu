@@ -88,6 +88,9 @@ def edit_return(id):
 
     if request.method == 'POST':
         status_str = request.form.get('status')
+        note = request.form.get('note')
+
+        r.note = note
 
         try:
             status_enum = ReturnStatus[status_str]
@@ -100,6 +103,19 @@ def edit_return(id):
 
         flash("Return updated successfully!", "success")
         return redirect(url_for('return_routes.get_returnlist'))
+
+@return_routes.route('/returnback/<int:id>', methods=['GET', 'POST'])
+@login_required
+def return_back(id):
+
+    r = Return.query.get(id)
+
+    r.status = ReturnStatus.CONFIRM
+
+    db.session.commit()
+
+    flash("Successfully applied for a return!", "success")
+    return redirect(url_for('return_routes.get_returnlist'))
 
 @return_routes.route('/finalize_return/<int:return_id>', methods=['POST'])
 @login_required

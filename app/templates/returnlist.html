@@ -84,6 +84,7 @@
                                     <th>Kode Barang</th>
                                     <th>Jumlah</th>
                                     <th>Status Peminjaman</th>
+                                    <th>Detail</th>
                                     <th>Diajukan Pada</th>
                                     <th>Diperbaharui Pada</th>
                                     <th>Action</th>
@@ -106,9 +107,15 @@
                                                 <span class="badge bg-danger">{{ r.status.value }}</span>
                                             {% endif %}
                                         </td>
+                                        <td>{{ r.note|replace("\n", "<br>")|safe }}</td>
                                         <td>{{ r.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                         <td>{{ r.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
                                         <td>
+                                            {% if r.status == ReturnStatus.REJECTED %}
+                                            <a class="me-3" href="{{ url_for('return_routes.return_back', id=r.id) }}" title="Return Loan">
+                                                <img src="{{ url_for('static', filename='img/icons/return.svg') }}" alt="Return">
+                                            </a>
+                                            {% endif %}
                                             <a class="me-3" href="{{ url_for('return_routes.edit_return', id=r.id) }}">
                                                 <img src="static/img/icons/edit.svg" alt="img">
                                             </a> 
