@@ -34,7 +34,12 @@
     <div class="main-wrapper">
         
         {% include 'navbar.html' %}
-        {% include 'sidebar.html' %}
+
+        {% if logged_in_user.role == 'Admin Lab' %}
+            {% include 'sidebar_admin.html' %}
+        {% else %}
+            {% include 'sidebar_mahasiswa.html' %}
+        {% endif %}
 
         <div class="page-wrapper">
             <div class="content">
@@ -83,15 +88,15 @@
                             <table class="table  datanew">
                                 <thead>
                                     <tr>
-                                    <th>Nama Peminjam</th>
-                                    <th>NIM</th>
-                                    <th>Nama Barang</th>
-                                    <th>Kode Barang</th>
-                                    <th>Jumlah</th>
-                                    <th>Status Peminjaman</th>
-                                    <th>Ditambahkan Pada</th>
-                                    <th>Diperbaharui Pada</th>
-                                    <th>Action</th>
+                                        <th>Nama Peminjam</th>
+                                        <th>NIM</th>
+                                        <th>Nama Barang</th>
+                                        <th>Kode Barang</th>
+                                        <th>Jumlah</th>
+                                        <th>Status Peminjaman</th>
+                                        <th>Ditambahkan Pada</th>
+                                        <th>Diperbaharui Pada</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -129,12 +134,15 @@
                                                 <img src="{{ url_for('static', filename='img/icons/return.svg') }}" alt="Return">
                                             </a>
                                             {% endif %}
+                                            
+                                            {% if logged_in_user.role == 'Admin Lab' %}
                                             <a class="me-3" href="{{ url_for('loan_routes.edit_loan', loan_id=loan.id) }}">
                                                 <img src="static/img/icons/edit.svg" alt="img">
                                             </a>                                                                    
                                             <a class="me-3" href="javascript:void(0);" onclick="confirmDelete('{{ url_for('loan_routes.delete_loan', loan_id=loan.id) }}')">
                                                 <img src="static/img/icons/delete.svg" alt="img">
-                                            </a> 
+                                            </a>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                     {% endfor %}

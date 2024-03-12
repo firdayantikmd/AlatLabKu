@@ -60,6 +60,55 @@
                                 </div>
                             </div>
                             <div class="form-login">
+                                <label for="no_hp">No.HP</label>
+                                <div class="form-addons">
+                                    <input type="no_hp" name="no_hp" placeholder="Masukkan No.HP" required>
+                                    <img src="static/img/icons/hp.svg" alt="img">
+                                </div>
+                            </div>
+                            <div class="form-login">
+                                <label for="full_name">Nama Lengkap</label>
+                                <div class="form-addons">
+                                    <input type="full_name" name="full_name" placeholder="Masukkan Nama Lengkap" required>
+                                    <img src="static/img/icons/transfer1.svg" alt="img">
+                                </div>
+                            </div>
+                            <div class="form-login">
+                                <label for="student_id">NIM</label>
+                                <div class="form-addons">
+                                    <input type="student_id" name="student_id" placeholder="Masukkan NIM" required>
+                                    <img src="static/img/icons/wallet1.svg" alt="img">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Foto Profil</label>
+                                <!-- <div class="image-upload">
+                                    <input type="file">
+                                    <div class="image-uploads">
+                                        <img src="static/img/icons/upload.svg" alt="img">
+                                        <h4>Drag and drop a file to upload</h4>
+                                    </div>
+                                </div> -->
+                                <div class="product-list">
+                                    <ul class="row">
+                                        <li>
+                                            <div class="productviews">
+                                                <div class="productviewsimg">
+                                                    <img id="selfPhotoDisplay" src="{{ url_for('static', filename='img/icons/default_user.png') }}" alt="User Photo">
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="image-upload" name="self_photo">
+                                    <input type="file" name="self_photo" onchange="previewImage(this, 'selfPhotoDisplay')">
+                                    <div class="image-uploads">
+                                        <img src="{{ url_for('static', filename='img/icons/upload.svg') }}" alt="img">
+                                        <h4>Drag and drop a file to upload</h4>
+                                    </div>
+                                </div>  
+                            </div>
+                            <div class="form-login">
                                 <button type="submit" class="btn btn-login">Sign Up</button>
                             </div>
                         </form>
@@ -80,5 +129,21 @@
     <script src="static/js/feather.min.js"></script>
     <script src="static/js/bootstrap.bundle.min.js"></script>
     <script src="static/js/script.js"></script>
+
+    <script>
+        function previewImage(input, imgId) {
+            var file = input.files[0];
+            if (file) {
+                var reader = new FileReader();
+
+                reader.onload = function(e) {
+                    document.getElementById(imgId).src = e.target.result;
+                }
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+    </script>
 </body>
 </html>

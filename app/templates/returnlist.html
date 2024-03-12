@@ -33,7 +33,12 @@
 
     <div class="main-wrapper">
         {% include 'navbar.html' %}
-        {% include 'sidebar.html' %}
+        
+        {% if logged_in_user.role == 'Admin Lab' %}
+            {% include 'sidebar_admin.html' %}
+        {% else %}
+            {% include 'sidebar_mahasiswa.html' %}
+        {% endif %}
 
         <div class="page-wrapper">
             <div class="content">
@@ -116,9 +121,12 @@
                                                 <img src="{{ url_for('static', filename='img/icons/return.svg') }}" alt="Return">
                                             </a>
                                             {% endif %}
+
+                                            {% if logged_in_user.role == 'Admin Lab' %}
                                             <a class="me-3" href="{{ url_for('return_routes.edit_return', id=r.id) }}">
                                                 <img src="static/img/icons/edit.svg" alt="img">
-                                            </a> 
+                                            </a>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                     {% endfor %}

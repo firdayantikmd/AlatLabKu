@@ -34,7 +34,12 @@
 
     <div class="main-wrapper">
         {% include 'navbar.html' %}
-        {% include 'sidebar.html' %}
+        
+        {% if logged_in_user.role == 'Admin Lab' %}
+            {% include 'sidebar_admin.html' %}
+        {% else %}
+            {% include 'sidebar_mahasiswa.html' %}
+        {% endif %}
 
         <div class="page-wrapper">
             <div class="content">
@@ -114,12 +119,14 @@
                                             <td>{{ user.created_at|default("Date not available", true) }}</td>
                                             <td>{{ user.updated_at|default("Date not available", true) }}</td>
                                             <td>
+                                                {% if logged_in_user.role == 'Admin Lab' %}
                                                 <a class="me-3" href="{{ url_for('user_routes.edit_user', id=user.id) }}"> <!-- Adjusted for dynamic routing -->
                                                     <img src="{{ url_for('static', filename='img/icons/edit.svg') }}" alt="edit">
                                                 </a>
                                                 <a class="me-3" href="javascript:void(0);" onclick="confirmDelete('{{ url_for('user_routes.delete_user', id=user.id) }}')">
                                                     <img src="static/img/icons/delete.svg" alt="img">
                                                 </a> 
+                                                {% endif %}
                                             </td>
                                         </tr>
                                     {% endfor %}

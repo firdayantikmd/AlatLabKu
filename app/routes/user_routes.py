@@ -28,6 +28,32 @@ def signup():
         email = request.form.get('email')
         password = request.form.get('password')
 
+        # dlt the code
+        no_hp = request.form.get('no_hp')
+        full_name = request.form.get('full_name')
+        student_id = request.form.get('student_id')
+        self_photo_file = request.files.get('self_photo')
+        card_photo_file = request.files.get('card_photo')
+
+        if self_photo_file and allowed_file(self_photo_file.filename):
+            if user.self_photo and os.path.exists(user.self_photo):
+                os.remove(user.self_photo)
+                
+            filename = secure_filename(self_photo_file.filename)
+            self_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            self_photo_file.save(self_photo_path)
+            user.self_photo = self_photo_path
+
+        if card_photo_file and allowed_file(card_photo_file.filename):
+            if user.card_photo and os.path.exists(user.card_photo):
+                os.remove(user.card_photo)
+                
+            filename = secure_filename(card_photo_file.filename)
+            card_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            card_photo_file.save(card_photo_path)
+            user.card_photo = card_photo_path
+        # dlt the code
+
         # Check if user already exists
         user = User.query.filter_by(username=username).first()
         if user:
@@ -39,6 +65,9 @@ def signup():
             username=username,
             email=email,
             password=generate_password_hash(password, method='pbkdf2:sha256'),
+            no_hp=no_hp,
+            full_name=full_name,
+            student_id=student_id,
             role='Mahasiswa'
         )
         db.session.add(new_user)
@@ -62,6 +91,8 @@ def signin():
 
         session['user_id'] = user.id
         session['username'] = user.username
+        session['full_name'] = user.full_name
+        session['role'] = user.role
 
         flash('Login successful!')
         return redirect(url_for('base_routes.home'))
@@ -98,6 +129,56 @@ def signout():
 #     users = pagination.items
 
 #     return render_template('userlist.html', users=users, pagination=pagination)
+
+@user_routes.route('/userprofile', methods=['GET', 'POST'])
+@login_required
+def user_profile():
+    # Assuming you have a User model that queries users by id
+    logged_in_user = User.query.get(session.get('user_id'))
+
+    email = logged_in_user.email
+
+    if request.method == 'GET':
+        return render_template('profile.html', user=logged_in_user)
+
+    elif request.method == 'POST':
+        username = request.form.get('username')
+        full_name = request.form.get('full_name')
+        student_id = request.form.get('student_id')
+        role = request.form.get('role', 'Mahasiswa')
+        no_hp = request.form.get('no_hp')
+
+        user.username = username
+        user.full_name = full_name if full_name else user.full_name
+        user.student_id = student_id if student_id else user.student_id
+        user.role = role if role else user.role
+        user.no_hp = no_hp if no_hp else user.no_hp
+
+        self_photo_file = request.files.get('self_photo')
+        card_photo_file = request.files.get('card_photo')
+
+        if self_photo_file and allowed_file(self_photo_file.filename):
+            if user.self_photo and os.path.exists(user.self_photo):
+                os.remove(user.self_photo)
+                
+            filename = secure_filename(self_photo_file.filename)
+            self_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            self_photo_file.save(self_photo_path)
+            user.self_photo = self_photo_path
+
+        if card_photo_file and allowed_file(card_photo_file.filename):
+            if user.card_photo and os.path.exists(user.card_photo):
+                os.remove(user.card_photo)
+                
+            filename = secure_filename(card_photo_file.filename)
+            card_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            card_photo_file.save(card_photo_path)
+            user.card_photo = card_photo_path
+
+        db.session.commit()
+
+        flash("User updated successfully!", "success")
+        return redirect(url_for('user_routes.get_userlist'))
 
 @user_routes.route('/adduser', methods=['GET', 'POST'])
 @login_required

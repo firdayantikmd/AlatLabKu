@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from database import db
 from models.returnitem import Return, ReturnStatus
-from models.user import User
+from models.user import User, UserRole
 from models.product import Product
 from models.loan import Loan, LoanStatus
 from helpers import login_required
@@ -14,7 +14,13 @@ import logging
 @return_routes.route('/returnlist', methods=['GET'])
 @login_required
 def get_returnlist():
-    returns = Return.query.all()
+    logged_in_user = User.query.get(session.get('user_id'))
+
+    if logged_in_user.role == 'Mahasiswa':
+        returns = Return.query.filter_by(user_id=logged_in_user.id).all()
+    else:
+        returns = Return.query.all()
+        
     return render_template('returnlist.html', returns=returns, ReturnStatus=ReturnStatus)
 
 @return_routes.route('/addreturn/<int:loan_id>', methods=['GET', 'POST'])

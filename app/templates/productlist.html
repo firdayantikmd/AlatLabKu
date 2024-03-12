@@ -33,7 +33,12 @@
 
     <div class="main-wrapper">
         {% include 'navbar.html' %}
-        {% include 'sidebar.html' %}
+
+        {% if logged_in_user.role == 'Admin Lab' %}
+            {% include 'sidebar_admin.html' %}
+        {% else %}
+            {% include 'sidebar_mahasiswa.html' %}
+        {% endif %}
 
         <div class="page-wrapper">
             <div class="content">
@@ -143,12 +148,14 @@
                                                 <a class="me-3" href="{{ url_for('product_routes.product_details', id=product.id) }}">
                                                     <img src="static/img/icons/eye.svg" alt="img">
                                                 </a>
+                                                {% if logged_in_user.role == 'Admin Lab' %}
                                                 <a class="me-3" href="{{ url_for('product_routes.editproduct', id=product.id) }}">
                                                     <img src="static/img/icons/edit.svg" alt="img">
                                                 </a>
                                                 <a class="me-3" href="javascript:void(0);" onclick="confirmDelete('{{ url_for('product_routes.delete_product', id=product.id) }}')">
                                                     <img src="static/img/icons/delete.svg" alt="img">
-                                                </a>                                                
+                                                </a>
+                                                {% endif %}                                               
                                             </td>
                                         </tr>
                                     {% endfor %}

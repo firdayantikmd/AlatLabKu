@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from database import db
 from models.loan import Loan, LoanStatus
 from models.product import Product
-from models.user import User
+from models.user import User, UserRole
 from helpers import login_required
 
 loan_routes = Blueprint('loan_routes', __name__)
@@ -10,7 +10,13 @@ loan_routes = Blueprint('loan_routes', __name__)
 @loan_routes.route('/loanlist', methods=['GET'])
 @login_required
 def get_loanlist():
-    loans = Loan.query.all()
+    logged_in_user = User.query.get(session.get('user_id'))
+
+    if logged_in_user.role == 'Mahasiswa':
+        loans = Loan.query.filter_by(user_id=logged_in_user.id).all()
+    else:
+        loans = Loan.query.all()
+
     return render_template('loanlist.html', loans=loans, LoanStatus=LoanStatus)
 
 @loan_routes.route('/addloan', methods=['GET', 'POST'])
@@ -78,10 +84,10 @@ def edit_loan(loan_id):
         flash("Loan updated successfully!", "success")
         return redirect(url_for('loan_routes.get_loanlist'))
 
-@loan_routes.route('/deleteloan/<int:loan_id>', methods=['POST'])
+@loan_routes.route('/deleteloan/<int:loan_id>', methods=['POST', 'GET'])
 @login_required
 def delete_loan(loan_id):
-    loan = Loan.query.get(id=loan_id)
+    loan = Loan.query.get(loan_id)
     
     if not loan:
         flash("Loan not found", "error")

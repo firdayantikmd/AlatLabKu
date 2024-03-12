@@ -33,7 +33,12 @@
 
     <div class="main-wrapper">
         {% include 'navbar.html' %}
-        {% include 'sidebar.html' %}
+
+        {% if logged_in_user.role == 'Admin Lab' %}
+            {% include 'sidebar_admin.html' %}
+        {% else %}
+            {% include 'sidebar_mahasiswa.html' %}
+        {% endif %}
 
         <div class="page-wrapper">
             <div class="content">
