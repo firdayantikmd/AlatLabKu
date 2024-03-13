@@ -63,6 +63,8 @@
                                                         <div class="productviewsimg">
                                                             {% if user.self_photo %}
                                                                 <img id="selfPhotoDisplay" src="{{ url_for('static', filename=user.self_photo[7:]) }}" alt="User Photo">
+                                                            {% else %}
+                                                                <img id="cardPhotoDisplay" src="{{ url_for('static', filename='img/icons/default_user.png') }}" alt="Default Image">
                                                             {% endif %}
                                                         </div>
                                                     </div>
@@ -88,6 +90,8 @@
                                                         <div class="productviewsimg">
                                                             {% if user.card_photo %}
                                                                 <img id="cardPhotoDisplay" src="{{ url_for('static', filename=user.card_photo[7:]) }}" alt="Card Photo">
+                                                            {% else %}
+                                                                <img id="cardPhotoDisplay" src="{{ url_for('static', filename='img/icons/default_ktm.png') }}" alt="Default Image">
                                                             {% endif %}
                                                         </div>
                                                     </div>

@@ -53,21 +53,21 @@ def add_return(loan_id):
                 flash("You cannot return more than you borrowed!", "danger")
                 return redirect(url_for('return_routes.add_return'))
             
-            previous_quantity = loan.quantity
-            loan.quantity -= returned_quantity
+            # previous_quantity = loan.quantity
+            # loan.quantity -= returned_quantity
 
-            product = Product.query.get(loan.product_id)
-            product.stock += returned_quantity
+            # product = Product.query.get(loan.product_id)
+            # product.stock += returned_quantity
 
             return_entry = Return(user_id=logged_in_user.id, product_id=product.id, loan_id=loan.id, returned_quantity=returned_quantity)
             db.session.add(return_entry)
 
-            status = request.form.get('status')
+            # status = request.form.get('status')
             
-            if loan.quantity == 0:
-                loan.status = LoanStatus.RETURNED
-            elif loan.quantity < previous_quantity:
-                loan.status = LoanStatus.PARTIALLY_RETURNED
+            # if loan.quantity == 0:
+            #     loan.status = LoanStatus.RETURNED
+            # elif loan.quantity < previous_quantity:
+            #     loan.status = LoanStatus.PARTIALLY_RETURNED
 
             db.session.commit()
 

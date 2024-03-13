@@ -101,12 +101,20 @@
                                         <tr>
                                             <td class="profileimgname">
                                                 <a href="javascript:void(0);" class="product-img">
-                                                    <img src="{{ user.self_photo }}" alt="user's profile image">
+                                                    {% if user.self_photo %}
+                                                        <img src="{{ user.self_photo }}" alt="user's profile image">
+                                                    {% else %}
+                                                        <img src="{{ url_for('static', filename='img/icons/default_user.png') }}" alt="Default Image">
+                                                    {% endif %}
                                                 </a>
                                             </td>
                                             <td class="ktmimgname">
                                                 <a href="javascript:void(0);" class="product-img">
-                                                    <img src="{{ user.card_photo }}" alt="user's ktm image">
+                                                    {% if user.card_photo %}
+                                                        <img src="{{ user.card_photo }}" alt="user's ktm image">
+                                                    {% else %}
+                                                        <img src="{{ url_for('static', filename='img/icons/default_ktm.png') }}" alt="Default Image">
+                                                    {% endif %}
                                                 </a>
                                             </td>
                                             <td>{{ user.username }}</td>
