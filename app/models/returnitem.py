@@ -7,6 +7,7 @@ class ReturnStatus(PyEnum):
     CONFIRM = "Menunggu Konfirmasi"
     ACCEPTED = "Disetujui"
     REJECTED = "Ditolak"
+    FINISHED = "Pengembalian Selesai"
 
 class Return(db.Model):
     __tablename__ = 'returns'

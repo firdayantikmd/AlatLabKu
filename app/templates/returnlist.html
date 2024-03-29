@@ -110,6 +110,8 @@
                                                 <span class="badge bg-success">{{ r.status.value }}</span>
                                             {% elif r.status == ReturnStatus.REJECTED %}
                                                 <span class="badge bg-danger">{{ r.status.value }}</span>
+                                            {% elif r.status == ReturnStatus.FINISHED %}
+                                                <span class="badge bg-dark">{{ r.status.value }}</span>
                                             {% endif %}
                                         </td>
                                         <td>{{ r.note|replace("\n", "<br>")|safe }}</td>
