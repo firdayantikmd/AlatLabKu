@@ -47,11 +47,13 @@
                         <h4>Daftar Produk</h4>
                         <h6>Kelola Produk</h6>
                     </div>
+                    {% if logged_in_user.role == 'Admin Lab' %}
                     <div class="page-btn">
                         <a href="{{ url_for('product_routes.add_product') }}" class="btn btn-added"> <!-- Adjusted for dynamic routing -->
                             <img src="{{ url_for('static', filename='img/icons/plus.svg') }}" alt="img" class="me-1">Tambah Produk
                         </a>
                     </div>
+                    {% endif %}
                 </div>
                 <div class="card">
                     <div class="card-body">

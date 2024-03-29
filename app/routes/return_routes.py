@@ -98,17 +98,38 @@ def edit_return(id):
 
         r.note = note
 
-        try:
-            status_enum = ReturnStatus[status_str]
-            r.status = status_enum
-        except KeyError:
-            flash("Invalid return status", "error")
-            return redirect(url_for('return_routes.edit_return', id=r.id))
+        if r.status != ReturnStatus.FINISHED:
+            try:
+                status_enum = ReturnStatus[status_str]
+                # Update the status only if it's not already FINISHED
+                if status_enum == ReturnStatus.FINISHED:
+                    r.status = status_enum
+                    loan = Loan.query.get(r.loan_id)
+                    product = Product.query.get(r.product_id)
+                    if loan and product and loan.quantity >= r.returned_quantity:
+                        loan.quantity -= r.returned_quantity
+                        product.stock += r.returned_quantity
+                        if loan.quantity == 0:
+                            loan.status = LoanStatus.RETURNED
+                        else:
+                            loan.status = LoanStatus.PARTIALLY_RETURNED
+
+                    else:
+                        flash("Invalid operation. Loan or Product not found, or returned quantity is invalid.", "danger")
+                else:
+                    r.status = status_enum
+                    flash("Return status updated.", "success")
+            except KeyError:
+                flash("Invalid return status", "error")
+                return redirect(url_for('return_routes.edit_return', id=r.id))
         
         db.session.commit()
 
         flash("Return updated successfully!", "success")
         return redirect(url_for('return_routes.get_returnlist'))
+    
+    flash("Invalid request method", "danger")
+    return redirect(url_for('return_routes.edit_return', id=id))
 
 @return_routes.route('/returnback/<int:id>', methods=['GET', 'POST'])
 @login_required
