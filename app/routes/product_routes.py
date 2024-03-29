@@ -36,7 +36,7 @@ def add_product():
         # Save the product image if provided
         if product_image_file and allowed_file(product_image_file.filename):
             filename = secure_filename(product_image_file.filename)
-            product_image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            product_image_path = os.path.join(current_app.config['UPLOAD_FOLDER_PRODUCT'], filename)
             product_image_file.save(product_image_path)
 
         product_by_code = Product.query.filter_by(code=code).first()
@@ -131,7 +131,7 @@ def editproduct(id):
                 os.remove(product.product_image)
                 
             filename = secure_filename(product_image.filename)
-            product_image_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            product_image_path = os.path.join(current_app.config['UPLOAD_FOLDER_PRODUCT'], filename)
             product_image.save(product_image_path)
             product.product_image = product_image_path
         

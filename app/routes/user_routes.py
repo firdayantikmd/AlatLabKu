@@ -133,7 +133,7 @@ def user_profile():
                 os.remove(user.self_photo)
                 
             filename = secure_filename(self_photo_file.filename)
-            self_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            self_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER_PROFILE'], filename)
             self_photo_file.save(self_photo_path)
             user.self_photo = self_photo_path
 
@@ -142,7 +142,7 @@ def user_profile():
                 os.remove(user.card_photo)
                 
             filename = secure_filename(card_photo_file.filename)
-            card_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            card_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER_CARD'], filename)
             card_photo_file.save(card_photo_path)
             user.card_photo = card_photo_path
 
@@ -174,13 +174,13 @@ def add_user():
         # Save the self photo if provided
         if self_photo_file and allowed_file(self_photo_file.filename):
             filename = secure_filename(self_photo_file.filename)
-            self_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            self_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER_PROFILE'], filename)
             self_photo_file.save(self_photo_path)
 
         # Save the card photo if provided
         if card_photo_file and allowed_file(card_photo_file.filename):
             filename = secure_filename(card_photo_file.filename)
-            card_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            card_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER_CARD'], filename)
             card_photo_file.save(card_photo_path)
 
         user_by_username = User.query.filter_by(username=username).first()
@@ -261,7 +261,7 @@ def edit_user(id):
                 os.remove(user.self_photo)
                 
             filename = secure_filename(self_photo_file.filename)
-            self_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            self_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER_PROFILE'], filename)
             self_photo_file.save(self_photo_path)
             user.self_photo = self_photo_path
 
@@ -270,7 +270,7 @@ def edit_user(id):
                 os.remove(user.card_photo)
                 
             filename = secure_filename(card_photo_file.filename)
-            card_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            card_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER_CARD'], filename)
             card_photo_file.save(card_photo_path)
             user.card_photo = card_photo_path
 

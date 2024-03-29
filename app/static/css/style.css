@@ -7351,3 +7351,10 @@ span.select2-container.select2-container--default.select2-container--open {
   top: 50%;
   right: 10px;
 }
+
+.one-line {
+  white-space: nowrap; /* Pastikan teks tidak pindah ke baris baru */
+  overflow: hidden; /* Sembunyikan konten yang melampaui batas elemen */
+  text-overflow: ellipsis; /* Tambahkan "..." di akhir jika teks terpotong */
+  max-width: 150px; /* Atau lebar lain sesuai kebutuhan desain Anda */
+}

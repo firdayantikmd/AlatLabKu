@@ -134,7 +134,7 @@
                                             <td>{{ product.category }}</td>
                                             <td>{{ product.storage }}</td>
                                             <td>{{ product.stock }}</td>
-                                            <td>{{ product.details|replace("\n", "<br>")|safe }}</td>
+                                            <td class="one-line">{{ product.details.split("\n")[0]|safe }}</td>
                                             <td>
                                                 {% if product.stock and product.stock > 0 %}
                                                     <span class="bg-lightgreen badges">Tersedia</span>

@@ -48,6 +48,15 @@
                         <h6>Kelola Pengguna</h6>
                     </div>
                 </div>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        <div class="alerts">
+                        {% for message in messages %}
+                            <div class="alert alert-info">{{ message }}</div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
                 <div class="card">
                     <div class="card-body">
                         <form action="{{ url_for('user_routes.add_user') }}" method="post" enctype="multipart/form-data">

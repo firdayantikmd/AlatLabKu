@@ -8,6 +8,9 @@ app = Flask(__name__, static_folder='static')
 app.secret_key = 'pirda_cantik_suka_marah_marah'
 
 app.config['UPLOAD_FOLDER'] = 'static/photo'
+app.config['UPLOAD_FOLDER_PROFILE'] = 'static/self_photo'
+app.config['UPLOAD_FOLDER_CARD'] = 'static/card_photo'
+app.config['UPLOAD_FOLDER_PRODUCT'] = 'static/product_image'
 
 import logging
 
