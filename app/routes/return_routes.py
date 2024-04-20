@@ -52,22 +52,9 @@ def add_return(loan_id):
             if loan.quantity < returned_quantity:
                 flash("You cannot return more than you borrowed!", "danger")
                 return redirect(url_for('return_routes.add_return'))
-            
-            # previous_quantity = loan.quantity
-            # loan.quantity -= returned_quantity
-
-            # product = Product.query.get(loan.product_id)
-            # product.stock += returned_quantity
 
             return_entry = Return(user_id=logged_in_user.id, product_id=product.id, loan_id=loan.id, returned_quantity=returned_quantity)
             db.session.add(return_entry)
-
-            # status = request.form.get('status')
-            
-            # if loan.quantity == 0:
-            #     loan.status = LoanStatus.RETURNED
-            # elif loan.quantity < previous_quantity:
-            #     loan.status = LoanStatus.PARTIALLY_RETURNED
 
             db.session.commit()
 
@@ -143,22 +130,4 @@ def return_back(id):
 
     flash("Successfully applied for a return!", "success")
     return redirect(url_for('return_routes.get_returnlist'))
-
-@return_routes.route('/finalize_return/<int:return_id>', methods=['POST'])
-@login_required
-def finalize_return(return_id):
-    return_entry = Return.query.get(return_id)
-    
-    if return_entry and return_entry.status != ReturnStatus.FINISHED:
-        return_entry.status = ReturnStatus.FINISHED
-        loan = Loan.query.get(return_entry.loan_id)
-        product = Product.query.get(loan.product_id)
-        product.stock += loan.quantity  # Add back the returned items to the stock
-
-        db.session.commit()
-        flash("Return finalized and stock updated", "success")
-    else:
-        flash("Invalid return or return already finalized", "danger")
-
-    return redirect(url_for('loan_routes.get_returnlist'))
 
