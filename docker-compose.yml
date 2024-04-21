@@ -22,8 +22,4 @@ services:
       - POSTGRES_PASSWORD=pass!!0101
       - POSTGRES_DB=postgres
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-    driver: local
+      - /data/pgdata:/var/lib/postgresql/data
