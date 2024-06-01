@@ -44,13 +44,13 @@
             <div class="content">
                 <div class="page-header">
                     <div class="page-title">
-                        <h4>Profile</h4>
-                        <h6>User Profile</h6>
+                        <h4>Profil</h4>
+                        <h6>Profile pengguna</h6>
                     </div>
                 </div>
                 <div class="card">
                     <div class="card-body">
-                        <form action="{{ url_for('user_routes.user_profile', id=user.id) }}" method="post" enctype="multipart/form-data"></form>
+                        <form action="{{ url_for('user_routes.user_profile', id=user.id) }}" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="_method" value="PUT">
                             <div class="profile-set">
                                 <div class="profile-head"></div>
@@ -89,6 +89,18 @@
                                     <div class="form-group">
                                         <label for="email">Email</label>
                                         <input type="text" name="email" id="email" placeholder="{{ user.email }}" value="{{ user.email }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label for="password">Password Baru</label>
+                                        <input type="password" name="password" id="password" placeholder="Password Baru">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-sm-12">
+                                    <div class="form-group">
+                                        <label for="confirm_password">Konfirmasi Password</label>
+                                        <input type="password" name="confirm_password" id="confirm_password" placeholder="Konfirmasi Password">
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-sm-12">

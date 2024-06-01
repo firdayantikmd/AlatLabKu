@@ -104,10 +104,7 @@ def signout():
 @user_routes.route('/userprofile', methods=['GET', 'POST'])
 @login_required
 def user_profile():
-    # Assuming you have a User model that queries users by id
     logged_in_user = User.query.get(session.get('user_id'))
-
-    email = logged_in_user.email
 
     if request.method == 'GET':
         return render_template('profile.html', user=logged_in_user)
@@ -116,35 +113,43 @@ def user_profile():
         username = request.form.get('username')
         full_name = request.form.get('full_name')
         student_id = request.form.get('student_id')
-        role = request.form.get('role', 'Mahasiswa')
         no_hp = request.form.get('no_hp')
 
-        user.username = username
-        user.full_name = full_name if full_name else user.full_name
-        user.student_id = student_id if student_id else user.student_id
-        user.role = role if role else user.role
-        user.no_hp = no_hp if no_hp else user.no_hp
+        logged_in_user.username = username
+        logged_in_user.full_name = full_name if full_name else logged_in_user.full_name
+        logged_in_user.student_id = student_id if student_id else logged_in_user.student_id
+        logged_in_user.no_hp = no_hp if no_hp else logged_in_user.no_hp
 
         self_photo_file = request.files.get('self_photo')
         card_photo_file = request.files.get('card_photo')
 
         if self_photo_file and allowed_file(self_photo_file.filename):
-            if user.self_photo and os.path.exists(user.self_photo):
-                os.remove(user.self_photo)
+            if logged_in_user.self_photo and os.path.exists(logged_in_user.self_photo):
+                os.remove(logged_in_user.self_photo)
                 
             filename = secure_filename(self_photo_file.filename)
             self_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER_PROFILE'], filename)
             self_photo_file.save(self_photo_path)
-            user.self_photo = self_photo_path
+            logged_in_user.self_photo = self_photo_path
 
         if card_photo_file and allowed_file(card_photo_file.filename):
-            if user.card_photo and os.path.exists(user.card_photo):
-                os.remove(user.card_photo)
+            if logged_in_user.card_photo and os.path.exists(logged_in_user.card_photo):
+                os.remove(logged_in_user.card_photo)
                 
             filename = secure_filename(card_photo_file.filename)
             card_photo_path = os.path.join(current_app.config['UPLOAD_FOLDER_CARD'], filename)
             card_photo_file.save(card_photo_path)
-            user.card_photo = card_photo_path
+            logged_in_user.card_photo = card_photo_path
+
+        password = request.form.get('password')
+        confirm_password = request.form.get('confirm_password')
+
+        if password and confirm_password:
+            if password == confirm_password:
+                logged_in_user.password = generate_password_hash(password)
+            else:
+                flash("Passwords do not match!", "danger")
+                return redirect(url_for('user_routes.user_profile'))
 
         db.session.commit()
 
