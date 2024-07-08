@@ -5,7 +5,7 @@ from routes import user_routes, base_routes, product_routes, loan_routes, return
 import models
 
 app = Flask(__name__, static_folder='static')
-app.secret_key = 'pirda_cantik_suka_marah_marah'
+app.secret_key = 'alatlabku'
 
 app.config['UPLOAD_FOLDER'] = 'static/photo'
 
