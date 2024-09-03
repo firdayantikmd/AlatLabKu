@@ -1,8 +1,8 @@
-"""empty message
+"""first migrate
 
-Revision ID: 3f1c1ff76573
+Revision ID: 71e80fdaa2b2
 Revises: 
-Create Date: 2023-11-06 15:42:33.781358
+Create Date: 2024-09-03 01:22:39.685149
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '3f1c1ff76573'
+revision = '71e80fdaa2b2'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -55,7 +55,7 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
-    sa.Column('status', sa.Enum('CONFIRM', 'ACCEPTED', 'REJECTED', 'ON_LOAN', name='loanstatus'), nullable=False),
+    sa.Column('status', sa.Enum('CONFIRM', 'ACCEPTED', 'REJECTED', 'ON_LOAN', 'PARTIALLY_RETURNED', 'RETURNED', 'FINISHED', name='loanstatus'), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ),
@@ -68,7 +68,8 @@ def upgrade():
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('loan_id', sa.Integer(), nullable=False),
     sa.Column('returned_quantity', sa.Integer(), nullable=False),
-    sa.Column('status', sa.Enum('CONFIRM', 'ACCEPTED', 'REJECTED', 'RETURNED', 'FINISHED', name='returnstatus'), nullable=False),
+    sa.Column('status', sa.Enum('CONFIRM', 'ACCEPTED', 'REJECTED', 'FINISHED', name='returnstatus'), nullable=False),
+    sa.Column('note', sa.String(), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['loan_id'], ['loans.id'], ),

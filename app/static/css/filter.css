@@ -1,0 +1,146 @@
+/* General Styles for Filter Container */
+#filter-container {
+    font-family: 'Arial', sans-serif;
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    margin-top: 1rem;
+}
+
+/* Styling for Filter Group and Nested Groups */
+.filter-group {
+    background-color: #ffffff;
+    border: 1px solid #e3e3e3;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group .filter-group {
+    margin-top: 1rem;
+    padding-left: 1rem;
+    border-left: 3px solid #007bff;
+}
+
+/* Form Controls Styling (Dropdowns and Inputs) */
+.filter-group .form-control {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 14px;
+    width: auto;
+    display: inline-block;
+    margin-right: 0.75rem;
+}
+
+.filter-group .form-control:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Dropdown for Conditions (And/Or) */
+.group-condition {
+    width: 70px;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    background-color: #007bff;
+    color: #000;
+    border: none;
+}
+
+.group-condition:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Rule Container */
+.filter-rule {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.filter-rule:last-child {
+    margin-bottom: 0;
+}
+
+/* Button Styles */
+.add-filter-rule,
+.add-filter-group {
+    background-color: #007bff;
+    border: 1px solid #007bff;
+    color: #fff;
+    font-size: 14px;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    margin-right: 0.5rem;
+}
+
+.add-filter-rule:hover,
+.add-filter-group:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+#apply-filters {
+    background-color: #e83e8c;
+    border: 1px solid #e83e8c;
+    color: #fff;
+    font-size: 14px;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+#apply-filters:hover {
+    background-color: #d0267a;
+    border-color: #d0267a;
+}
+
+/* Three-Dot Menu Button Styling */
+.dropdown button.btn-light {
+    background-color: transparent;
+    border: none;
+    color: #007bff;
+    font-size: 14px;
+    margin-left: auto;
+    padding: 0.25rem 0.5rem;
+}
+
+.dropdown button.btn-light:hover {
+    color: #0056b3;
+}
+
+.dropdown-menu .dropdown-item {
+    font-size: 14px;
+    color: #007bff;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+}
+
+.dropdown-menu .dropdown-item:hover {
+    background-color: #f1f1f1;
+    color: #0056b3;
+}
+
+/* Add Rule Button (Bottom) */
+#filter-container .btn-secondary {
+    font-size: 14px;
+    padding: 0.5rem 1rem;
+    background-color: #6c757d;
+    color: #fff;
+    border: 1px solid #6c757d;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+#filter-container .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}

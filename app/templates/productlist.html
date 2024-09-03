@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="static/plugins/fontawesome/css/all.min.css">
 
     <link rel="stylesheet" href="static/css/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/filter.css') }}">
 </head>
 
 <body>
@@ -57,13 +58,28 @@
                 </div>
                 <div class="card">
                     <div class="card-body">
-                        <div class="table-top">
+                        <a class="me-3" id="filter-icon">
+                            <img src="static/img/icons/filter1.svg" alt="img">
+                        </a>
+
+                        <div class="card mb-0" id="filter_inputs" style="display: none;">
+                            <div class="card-body pb-0">
+                                <div id="filter-container">
+                                    <div>
+                                        <button id="initial-add-filter-rule" class="btn btn-secondary">Add Filter Rule</button>
+                                        <button id="initial-add-filter-group" class="btn btn-secondary">Add Filter Group</button>
+                                        <button id="apply-filters" class="btn btn-primary">Apply Filters</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- <div class="table-top">
                             <div class="search-set">
                                 <div class="search-input">
                                     <a class="btn btn-searchset"><img src="static/img/icons/search-white.svg" alt="img"></a>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         
                         <div class="card mb-0" id="filter_inputs">
                             <div class="card-body pb-0">
@@ -204,6 +220,158 @@
                 }
             });
         }
+
+        let groupCounter = 1;
+
+        function createFilterRule() {
+            const filterRule = document.createElement('div');
+            filterRule.className = 'filter-rule';
+
+            filterRule.innerHTML = `
+                <div class="d-flex align-items-center mt-2">
+                    <select class="form-control me-2 attribute-select">
+                        <option value="category">Category</option>
+                        <option value="price">Price</option>
+                        <option value="rating">Rating</option>
+                    </select>
+                    <select class="form-control me-2 condition-select">
+                        <option value="contains">Contains</option>
+                        <option value="equals">Equals</option>
+                        <option value="greater_than">Greater than</option>
+                        <option value="less_than">Less than</option>
+                    </select>
+                    <input type="text" class="form-control me-2 value-input" placeholder="Value">
+                    <div class="dropdown">
+                        <button class="btn btn-light" type="button" id="ruleOptions" data-bs-toggle="dropdown" aria-expanded="false">
+                            &bull;&bull;&bull;
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="ruleOptions">
+                            <li><a class="dropdown-item remove-rule" href="#">Remove</a></li>
+                            <li><a class="dropdown-item duplicate-rule" href="#">Duplicate</a></li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            // Attach remove and duplicate handlers
+            filterRule.querySelector('.remove-rule').addEventListener('click', function() {
+                filterRule.remove();
+            });
+
+            filterRule.querySelector('.duplicate-rule').addEventListener('click', function() {
+                const clonedRule = filterRule.cloneNode(true);
+                filterRule.parentElement.insertBefore(clonedRule, filterRule.nextSibling);
+                attachRuleHandlers(clonedRule);
+            });
+
+            return filterRule;
+        }
+
+        function createFilterGroup() {
+            const filterGroup = document.createElement('div');
+            filterGroup.id = `filter-group-${groupCounter++}`;
+            filterGroup.className = 'filter-group card';
+
+            filterGroup.innerHTML = `
+                <div class="card-body">
+                    <div class="d-flex align-items-center mt-2 mb-2">
+                        <select class="form-control me-2 group-condition">
+                            <option value="and">And</option>
+                            <option value="or">Or</option>
+                        </select>
+                        <button class="btn btn-secondary me-2 add-filter-rule">Add Filter Rule</button>
+                        <button class="btn btn-secondary me-2 add-filter-group">Add Filter Group</button>
+                        <div class="dropdown">
+                            <button class="btn btn-light" type="button" id="groupOptions" data-bs-toggle="dropdown" aria-expanded="false">
+                                &bull;&bull;&bull;
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="groupOptions">
+                                <li><a class="dropdown-item remove-group" href="#">Remove</a></li>
+                                <li><a class="dropdown-item duplicate-group" href="#">Duplicate</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="filter-rules"></div>
+                </div>
+            `;
+
+            const filterRulesContainer = filterGroup.querySelector('.filter-rules');
+
+            filterGroup.querySelector('.add-filter-rule').addEventListener('click', function() {
+                filterRulesContainer.appendChild(createFilterRule());
+            });
+
+            filterGroup.querySelector('.add-filter-group').addEventListener('click', function() {
+                filterRulesContainer.appendChild(createFilterGroup());
+            });
+
+            filterGroup.querySelector('.remove-group').addEventListener('click', function() {
+                filterGroup.remove();
+            });
+
+            filterGroup.querySelector('.duplicate-group').addEventListener('click', function() {
+                const clonedGroup = filterGroup.cloneNode(true);
+                filterGroup.parentElement.insertBefore(clonedGroup, filterGroup.nextSibling);
+                attachGroupHandlers(clonedGroup);
+            });
+
+            return filterGroup;
+        }
+
+        function attachGroupHandlers(group) {
+            const filterRulesContainer = group.querySelector('.filter-rules');
+
+            group.querySelector('.add-filter-rule').addEventListener('click', function() {
+                filterRulesContainer.appendChild(createFilterRule());
+            });
+
+            group.querySelector('.add-filter-group').addEventListener('click', function() {
+                filterRulesContainer.appendChild(createFilterGroup());
+            });
+
+            group.querySelector('.remove-group').addEventListener('click', function() {
+                group.remove();
+            });
+
+            group.querySelector('.duplicate-group').addEventListener('click', function() {
+                const clonedGroup = group.cloneNode(true);
+                group.parentElement.insertBefore(clonedGroup, group.nextSibling);
+                attachGroupHandlers(clonedGroup);
+            });
+        }
+
+        document.getElementById('filter-icon').addEventListener('click', function() {
+            const filterInputs = document.getElementById('filter_inputs');
+            filterInputs.style.display = filterInputs.style.display === 'none' ? 'block' : 'none';
+        });
+
+        document.getElementById('initial-add-filter-rule').addEventListener('click', function() {
+            document.getElementById('filter-container').appendChild(createFilterRule());
+        });
+
+        document.getElementById('initial-add-filter-group').addEventListener('click', function() {
+            document.getElementById('filter-container').appendChild(createFilterGroup());
+        });
+
+        document.getElementById('apply-filters').addEventListener('click', function() {
+            const groups = document.querySelectorAll('.filter-group');
+            const filterData = [];
+
+            groups.forEach(group => {
+                const rules = group.querySelectorAll('.filter-rule');
+                const groupData = [];
+                rules.forEach(rule => {
+                    const attribute = rule.querySelector('.attribute-select').value;
+                    const condition = rule.querySelector('.condition-select').value;
+                    const value = rule.querySelector('.value-input').value;
+                    groupData.push({ attribute, condition, value });
+                });
+                filterData.push(groupData);
+            });
+
+            console.log('Filters to apply:', filterData);
+            // Send the filterData to the backend to process the filter
+        });
     </script>
 
 </body>
