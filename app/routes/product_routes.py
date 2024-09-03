@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from models.product import Product, ProductType
 from database import db
 
@@ -154,3 +154,19 @@ def delete_product(id):
 
     flash("Product deleted successfully!", "success")
     return redirect(url_for('product_routes.get_productlist'))
+
+@product_routes.route('/get_filter_attributes', methods=['GET'])
+@login_required
+def get_filter_attributes():
+    # Define the available attributes for filtering based on your Product model
+    attributes = {
+        'product_name': 'Nama Produk',
+        'code': 'Kode Produk',
+        'category': 'Kategori',
+        'storage': 'Tempat Barang',
+        'stock': 'Stock',
+        'details': 'Detail',
+        'created_at': 'Ditambahkan Pada',
+        'updated_at': 'Diperbaharui Pada'
+    }
+    return jsonify(attributes)

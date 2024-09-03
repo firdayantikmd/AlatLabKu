@@ -221,6 +221,25 @@
             });
         }
 
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fetch the filter attributes from the backend
+            fetch('/get_filter_attributes')
+                .then(response => response.json())
+                .then(data => {
+                    // Populate the attribute select dropdowns
+                    const attributeSelects = document.querySelectorAll('.attribute-select');
+                    attributeSelects.forEach(select => {
+                        select.innerHTML = ''; // Clear existing options
+                        for (const [value, label] of Object.entries(data)) {
+                            const option = document.createElement('option');
+                            option.value = value;
+                            option.textContent = label;
+                            select.appendChild(option);
+                        }
+                    });
+                });
+        });
+
         let groupCounter = 1;
 
         function createFilterRule() {
@@ -230,9 +249,7 @@
             filterRule.innerHTML = `
                 <div class="d-flex align-items-center mt-2">
                     <select class="form-control me-2 attribute-select">
-                        <option value="category">Category</option>
-                        <option value="price">Price</option>
-                        <option value="rating">Rating</option>
+                        <!-- Options will be dynamically populated -->
                     </select>
                     <select class="form-control me-2 condition-select">
                         <option value="contains">Contains</option>
@@ -264,6 +281,20 @@
                 attachRuleHandlers(clonedRule);
             });
 
+            // After adding the rule, populate the select options
+            fetch('/get_filter_attributes')
+                .then(response => response.json())
+                .then(data => {
+                    const select = filterRule.querySelector('.attribute-select');
+                    select.innerHTML = ''; // Clear existing options
+                    for (const [value, label] of Object.entries(data)) {
+                        const option = document.createElement('option');
+                        option.value = value;
+                        option.textContent = label;
+                        select.appendChild(option);
+                    }
+                });
+
             return filterRule;
         }
 
@@ -274,7 +305,7 @@
 
             filterGroup.innerHTML = `
                 <div class="card-body">
-                    <div class="d-flex align-items-center mt-2 mb-2">
+                    <div class="d-flex align-items-center">
                         <select class="form-control me-2 group-condition">
                             <option value="and">And</option>
                             <option value="or">Or</option>

@@ -62,7 +62,6 @@
 .filter-rule {
     display: flex;
     align-items: center;
-    margin-bottom: 0.75rem;
 }
 
 .filter-rule:last-child {
