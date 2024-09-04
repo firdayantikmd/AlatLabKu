@@ -375,11 +375,7 @@
                                 <option value="is_not_empty">Is not empty</option>
                             `;
                         } else if (selectedAttribute.type === 'enum') {
-                            conditionSelect.innerHTML = `
-                                <option value="is">Is</option>
-                                <option value="is_not">Is not</option>
-                            `;
-                            // Enum types do not require a value input field, so hide it
+                            conditionSelect.innerHTML = selectedAttribute.options.map(option => `<option value="${option}">${option}</option>`).join('');
                             valueInput.style.display = 'none';
                         } else if (selectedAttribute.type === 'number') {
                             conditionSelect.innerHTML = `
