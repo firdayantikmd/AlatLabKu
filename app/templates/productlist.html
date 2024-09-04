@@ -222,20 +222,78 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Fetch the filter attributes from the backend
             fetch('/get_filter_attributes')
                 .then(response => response.json())
                 .then(data => {
-                    // Populate the attribute select dropdowns
                     const attributeSelects = document.querySelectorAll('.attribute-select');
                     attributeSelects.forEach(select => {
-                        select.innerHTML = ''; // Clear existing options
-                        for (const [value, label] of Object.entries(data)) {
+                        select.innerHTML = ''; 
+                        for (const [value, details] of Object.entries(data)) {
                             const option = document.createElement('option');
                             option.value = value;
-                            option.textContent = label;
+                            option.textContent = details.label;
                             select.appendChild(option);
                         }
+
+                        select.addEventListener('change', function() {
+                            const selectedValue = this.value;
+                            const selectedAttribute = data[selectedValue];
+                            const conditionSelect = this.parentElement.querySelector('.condition-select');
+                            const valueInput = this.parentElement.querySelector('.value-input');
+
+                            conditionSelect.innerHTML = ''; 
+                            valueInput.style.display = 'inline-block';
+
+                            if (selectedAttribute.type === 'string') {
+                                conditionSelect.innerHTML = `
+                                    <option value="equals">Is</option>
+                                    <option value="not_equals">Is not</option>
+                                    <option value="contains">Contains</option>
+                                    <option value="not_contains">Does not contain</option>
+                                    <option value="starts_with">Starts with</option>
+                                    <option value="ends_with">Ends with</option>
+                                    <option value="is_empty">Is empty</option>
+                                    <option value="is_not_empty">Is not empty</option>
+                                `;
+                            } else if (selectedAttribute.type === 'enum') {
+                                conditionSelect.innerHTML = selectedAttribute.options.map(option => `<option value="${option}">${option}</option>`).join('');
+                                valueInput.style.display = 'none';
+                            } else if (selectedAttribute.type === 'number') {
+                                conditionSelect.innerHTML = `
+                                    <option value="equals">=</option>
+                                    <option value="not_equals">#</option>
+                                    <option value="greater_than">></option>
+                                    <option value="less_than"><</option>
+                                    <option value="greater_than_or_equal">>=</option>
+                                    <option value="less_than_or_equal"><=</option>
+                                    <option value="is_empty">Is empty</option>
+                                    <option value="is_not_empty">Is not empty</option>
+                                `;
+                            } else if (selectedAttribute.type === 'date') {
+                                conditionSelect.innerHTML = `
+                                    <option value="equals">Is</option>
+                                    <option value="before">Before</option>
+                                    <option value="after">After</option>
+                                    <option value="between">Between</option>
+                                    <option value="is_empty">Is empty</option>
+                                    <option value="is_not_empty">Is not empty</option>
+                                `;
+
+                                conditionSelect.addEventListener('change', function() {
+                                    if (this.value === 'between') {
+                                        valueInput.type = 'date';
+                                        valueInput.placeholder = 'Start date';
+                                        valueInput2.style.display = 'inline-block';
+                                        valueInput2.type = 'date';
+                                        valueInput2.placeholder = 'End date';
+                                    } else {
+                                        valueInput2.style.display = 'none';
+                                    }
+                                });
+
+                                valueInput.type = 'date';
+                            }
+                        });
                     });
                 });
         });
@@ -252,12 +310,10 @@
                         <!-- Options will be dynamically populated -->
                     </select>
                     <select class="form-control me-2 condition-select">
-                        <option value="contains">Contains</option>
-                        <option value="equals">Equals</option>
-                        <option value="greater_than">Greater than</option>
-                        <option value="less_than">Less than</option>
+                        <!-- Conditions will be dynamically populated based on the attribute type -->
                     </select>
                     <input type="text" class="form-control me-2 value-input" placeholder="Value">
+                    <input type="text" class="form-control me-2 value-input-2" style="display: none;" placeholder="Second Value">
                     <div class="dropdown">
                         <button class="btn btn-light" type="button" id="ruleOptions" data-bs-toggle="dropdown" aria-expanded="false">
                             &bull;&bull;&bull;
@@ -281,7 +337,7 @@
                 attachRuleHandlers(clonedRule);
             });
 
-            // After adding the rule, populate the select options
+            // Fetch the filter attributes and populate the attribute-select
             fetch('/get_filter_attributes')
                 .then(response => response.json())
                 .then(data => {
@@ -290,9 +346,73 @@
                     for (const [value, label] of Object.entries(data)) {
                         const option = document.createElement('option');
                         option.value = value;
-                        option.textContent = label;
+                        option.textContent = label.label;
                         select.appendChild(option);
                     }
+
+                    // Attach event listener to change the condition dropdown and input fields based on the attribute type
+                    select.addEventListener('change', function() {
+                        const selectedValue = this.value;
+                        const selectedAttribute = data[selectedValue];
+                        const conditionSelect = filterRule.querySelector('.condition-select');
+                        const valueInput = filterRule.querySelector('.value-input');
+                        const valueInput2 = filterRule.querySelector('.value-input-2');
+
+                        conditionSelect.innerHTML = ''; // Clear existing options
+                        valueInput.style.display = 'inline-block';
+                        valueInput2.style.display = 'none';
+
+                        // Define condition options based on attribute type
+                        if (selectedAttribute.type === 'string') {
+                            conditionSelect.innerHTML = `
+                                <option value="is">Is</option>
+                                <option value="is_not">Is not</option>
+                                <option value="contains">Contains</option>
+                                <option value="does_not_contain">Does not contain</option>
+                                <option value="starts_with">Starts with</option>
+                                <option value="ends_with">Ends with</option>
+                                <option value="is_empty">Is empty</option>
+                                <option value="is_not_empty">Is not empty</option>
+                            `;
+                        } else if (selectedAttribute.type === 'enum') {
+                            conditionSelect.innerHTML = `
+                                <option value="is">Is</option>
+                                <option value="is_not">Is not</option>
+                            `;
+                            // Enum types do not require a value input field, so hide it
+                            valueInput.style.display = 'none';
+                        } else if (selectedAttribute.type === 'number') {
+                            conditionSelect.innerHTML = `
+                                <option value="=">Equals</option>
+                                <option value="!=">Not equals</option>
+                                <option value=">">Greater than</option>
+                                <option value="<">Less than</option>
+                                <option value=">=">Greater than or equal</option>
+                                <option value="<=">Less than or equal</option>
+                                <option value="is_empty">Is empty</option>
+                                <option value="is_not_empty">Is not empty</option>
+                            `;
+                        } else if (selectedAttribute.type === 'date') {
+                            conditionSelect.innerHTML = `
+                                <option value="equals">Is</option>
+                                <option value="before">Before</option>
+                                <option value="after">After</option>
+                                <option value="between">Between</option>
+                                <option value="is_empty">Is empty</option>
+                                <option value="is_not_empty">Is not empty</option>
+                            `;
+                            valueInput.type = 'date';
+
+                            conditionSelect.addEventListener('change', function() {
+                                if (this.value === 'between') {
+                                    valueInput2.style.display = 'inline-block';
+                                    valueInput2.type = 'date';
+                                } else {
+                                    valueInput2.style.display = 'none';
+                                }
+                            });
+                        }
+                    });
                 });
 
             return filterRule;

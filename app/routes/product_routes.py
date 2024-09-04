@@ -158,15 +158,15 @@ def delete_product(id):
 @product_routes.route('/get_filter_attributes', methods=['GET'])
 @login_required
 def get_filter_attributes():
-    # Define the available attributes for filtering based on your Product model
+    # Define the available attributes for filtering along with their types
     attributes = {
-        'product_name': 'Nama Produk',
-        'code': 'Kode Produk',
-        'category': 'Kategori',
-        'storage': 'Tempat Barang',
-        'stock': 'Stock',
-        'details': 'Detail',
-        'created_at': 'Ditambahkan Pada',
-        'updated_at': 'Diperbaharui Pada'
+        'product_name': {'label': 'Nama Produk', 'type': 'string'},
+        'code': {'label': 'Kode Produk', 'type': 'string'},
+        'category': {'label': 'Kategori', 'type': 'enum', 'options': ['Bahan', 'Alat']},
+        'storage': {'label': 'Tempat Barang', 'type': 'string'},
+        'stock': {'label': 'Stock', 'type': 'number'},
+        'details': {'label': 'Detail', 'type': 'string'},
+        'created_at': {'label': 'Ditambahkan Pada', 'type': 'date'},
+        'updated_at': {'label': 'Diperbaharui Pada', 'type': 'date'}
     }
     return jsonify(attributes)
