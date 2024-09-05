@@ -227,7 +227,7 @@
                 .then(data => {
                     const attributeSelects = document.querySelectorAll('.attribute-select');
                     attributeSelects.forEach(select => {
-                        select.innerHTML = ''; 
+                        // Populate attribute options
                         for (const [value, details] of Object.entries(data)) {
                             const option = document.createElement('option');
                             option.value = value;
@@ -239,10 +239,10 @@
                             const selectedValue = this.value;
                             const selectedAttribute = data[selectedValue];
                             const conditionSelect = this.parentElement.querySelector('.condition-select');
-                            const valueInput = this.parentElement.querySelector('.value-input');
+                            const valueInputContainer = this.parentElement.querySelector('.value-container');
 
-                            conditionSelect.innerHTML = ''; 
-                            valueInput.style.display = 'inline-block';
+                            conditionSelect.innerHTML = '';
+                            valueInputContainer.innerHTML = ''; 
 
                             if (selectedAttribute.type === 'string') {
                                 conditionSelect.innerHTML = `
@@ -255,9 +255,13 @@
                                     <option value="is_empty">Is empty</option>
                                     <option value="is_not_empty">Is not empty</option>
                                 `;
+                                valueInputContainer.innerHTML = `<input type="text" class="form-control value-input" placeholder="Enter value">`;
                             } else if (selectedAttribute.type === 'enum') {
-                                conditionSelect.innerHTML = selectedAttribute.options.map(option => `<option value="${option}">${option}</option>`).join('');
-                                valueInput.style.display = 'none';
+                                valueInputContainer.innerHTML = `
+                                    <select class="form-control value-input">
+                                        ${selectedAttribute.options.map(option => `<option value="${option}">${option}</option>`).join('')}
+                                    </select>
+                                `;
                             } else if (selectedAttribute.type === 'number') {
                                 conditionSelect.innerHTML = `
                                     <option value="equals">=</option>
@@ -269,6 +273,7 @@
                                     <option value="is_empty">Is empty</option>
                                     <option value="is_not_empty">Is not empty</option>
                                 `;
+                                valueInputContainer.innerHTML = `<input type="number" class="form-control value-input" placeholder="Enter number">`;
                             } else if (selectedAttribute.type === 'date') {
                                 conditionSelect.innerHTML = `
                                     <option value="equals">Is</option>
@@ -278,20 +283,19 @@
                                     <option value="is_empty">Is empty</option>
                                     <option value="is_not_empty">Is not empty</option>
                                 `;
+                                valueInputContainer.innerHTML = `
+                                    <input type="date" class="form-control value-input" placeholder="Select date">
+                                    <input type="date" class="form-control value-input-2" style="display: none;" placeholder="Second date">
+                                `;
 
                                 conditionSelect.addEventListener('change', function() {
+                                    const valueInput2 = valueInputContainer.querySelector('.value-input-2');
                                     if (this.value === 'between') {
-                                        valueInput.type = 'date';
-                                        valueInput.placeholder = 'Start date';
                                         valueInput2.style.display = 'inline-block';
-                                        valueInput2.type = 'date';
-                                        valueInput2.placeholder = 'End date';
                                     } else {
                                         valueInput2.style.display = 'none';
                                     }
                                 });
-
-                                valueInput.type = 'date';
                             }
                         });
                     });
@@ -326,7 +330,6 @@
                 </div>
             `;
 
-            // Attach remove and duplicate handlers
             filterRule.querySelector('.remove-rule').addEventListener('click', function() {
                 filterRule.remove();
             });
@@ -337,12 +340,11 @@
                 attachRuleHandlers(clonedRule);
             });
 
-            // Fetch the filter attributes and populate the attribute-select
             fetch('/get_filter_attributes')
                 .then(response => response.json())
                 .then(data => {
                     const select = filterRule.querySelector('.attribute-select');
-                    select.innerHTML = ''; // Clear existing options
+                    select.innerHTML = '';
                     for (const [value, label] of Object.entries(data)) {
                         const option = document.createElement('option');
                         option.value = value;
@@ -350,7 +352,6 @@
                         select.appendChild(option);
                     }
 
-                    // Attach event listener to change the condition dropdown and input fields based on the attribute type
                     select.addEventListener('change', function() {
                         const selectedValue = this.value;
                         const selectedAttribute = data[selectedValue];
@@ -358,11 +359,10 @@
                         const valueInput = filterRule.querySelector('.value-input');
                         const valueInput2 = filterRule.querySelector('.value-input-2');
 
-                        conditionSelect.innerHTML = ''; // Clear existing options
+                        conditionSelect.innerHTML = '';
                         valueInput.style.display = 'inline-block';
                         valueInput2.style.display = 'none';
 
-                        // Define condition options based on attribute type
                         if (selectedAttribute.type === 'string') {
                             conditionSelect.innerHTML = `
                                 <option value="is">Is</option>
