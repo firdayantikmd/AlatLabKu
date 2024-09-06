@@ -267,10 +267,9 @@
                                 valueInputContainer.innerHTML = `<input type="text" class="form-control value-input" placeholder="Enter value">`;
                             } else if (selectedAttribute.type === 'enum') {
                                 console.log('Generating enum conditions...');
-                                valueInputContainer.innerHTML = `
-                                    <select class="form-control value-input">
-                                        ${selectedAttribute.options.map(option => `<option value="${option}">${option}</option>`).join('')}
-                                    </select>
+                                conditionSelect.innerHTML = `
+                                    <option value="equals">Is</option>
+                                    <option value="not_equals">Is not</option>
                                 `;
                             } else if (selectedAttribute.type === 'number') {
                                 console.log('Generating number conditions...');
@@ -394,8 +393,10 @@
                             `;
                         } else if (selectedAttribute.type === 'enum') {
                             console.log('Generating enum conditions...');
-                            conditionSelect.innerHTML = selectedAttribute.options.map(option => `<option value="${option}">${option}</option>`).join('');
-                            valueInput.style.display = 'none';
+                            conditionSelect.innerHTML = `
+                                <option value="equals">Is</option>
+                                <option value="not_equals">Is not</option>
+                            `;
                         } else if (selectedAttribute.type === 'number') {
                             console.log('Generating number conditions...');
                             conditionSelect.innerHTML = `

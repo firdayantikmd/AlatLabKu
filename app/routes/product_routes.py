@@ -211,6 +211,8 @@ def apply_filters():
 
     print(f"Received filters: {filters}", flush=True)  # Debugging input
 
+    overall_conditions = []
+
     # Process each filter group
     for group in filters:
         group_condition = group.get('condition', 'and')
@@ -334,6 +336,9 @@ def apply_filters():
                 query = query.filter(and_(*conditions))
             elif group_condition == 'or':
                 query = query.filter(or_(*conditions))
+    
+    if overall_conditions:
+        query = query.filter(or_(*overall_conditions))
 
     # Execute query and return results
     products = query.all()
