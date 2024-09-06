@@ -504,21 +504,50 @@
             const groups = document.querySelectorAll('.filter-group');
             const filterData = [];
 
+            console.log('Number of filter groups:', groups.length);
+
             groups.forEach(group => {
                 const rules = group.querySelectorAll('.filter-rule');
-                const groupData = [];
+                const groupCondition = group.querySelector('.group-condition').value;
+                const groupData = { condition: groupCondition, rules: [] };
+
                 rules.forEach(rule => {
                     const attribute = rule.querySelector('.attribute-select').value;
                     const condition = rule.querySelector('.condition-select').value;
-                    const value = rule.querySelector('.value-input').value;
-                    groupData.push({ attribute, condition, value });
+                    const value = rule.querySelector('.value-input') ? rule.querySelector('.value-input').value : '';
+
+                    console.log('Attribute:', attribute, 'Condition:', condition, 'Value:', value);
+
+                    if (attribute && condition && value.trim() !== '') {
+                        groupData.rules.push({ attribute, condition, value });
+                    } else {
+                        // Log jika input kosong atau tidak valid
+                        console.warn('Empty or invalid filter rule:', { attribute, condition, value });
+                    }
                 });
-                filterData.push(groupData);
+
+                if (groupData.rules.length > 0) {
+                    filterData.push(groupData);
+                }
             });
 
-            console.log('Filters to apply:', filterData);
-            // Send the filterData to the backend to process the filter
+            console.log('Filter data to be sent:', filterData);
+
+            // Kirim data ke backend menggunakan fetch
+            fetch('/apply_filters', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ filters: filterData })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Tampilkan hasil yang difilter di sini
+                console.log('Filtered data:', data);
+            });
         });
+
     </script>
 
 </body>

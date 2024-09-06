@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from sqlalchemy import String, Integer, Enum, DateTime
 from models.product import Product, ProductType
 from database import db
-from sqlalchemy import inspect
+from sqlalchemy import inspect, and_, or_
 
 import os
 from werkzeug.utils import secure_filename
@@ -157,55 +157,103 @@ def delete_product(id):
     flash("Product deleted successfully!", "success")
     return redirect(url_for('product_routes.get_productlist'))
 
+# @product_routes.route('/get_filter_attributes', methods=['GET'])
+# @login_required
+# def get_filter_attributes():
+#     inspector = inspect(Product)
+#     attributes = {}
+
+#     for column in inspector.columns:
+#         column_name = column.name
+#         column_type = column.type
+
+#         if isinstance(column_type, String):
+#             attribute_type = 'string'
+#         elif isinstance(column_type, Integer):
+#             attribute_type = 'number'
+#         elif isinstance(column_type, Enum):
+#             attribute_type = 'enum'
+#             options = column_type.enums
+#         elif isinstance(column_type, DateTime):
+#             attribute_type = 'date'
+#         else:
+#             attribute_type = 'unknown'
+
+#         attributes[column_name] = {
+#             'label': column_name.replace('_', ' ').capitalize(),
+#             'type': attribute_type
+#         }
+        
+#         if attribute_type == 'enum':
+#             attributes[column_name]['options'] = options
+
+#     return jsonify(attributes)
+
 @product_routes.route('/get_filter_attributes', methods=['GET'])
 @login_required
 def get_filter_attributes():
-    inspector = inspect(Product)
-    attributes = {}
-
-    for column in inspector.columns:
-        column_name = column.name
-        column_type = column.type
-
-        if isinstance(column_type, String):
-            attribute_type = 'string'
-        elif isinstance(column_type, Integer):
-            attribute_type = 'number'
-        elif isinstance(column_type, Enum):
-            attribute_type = 'enum'
-            options = column_type.enums
-        elif isinstance(column_type, DateTime):
-            attribute_type = 'date'
-        else:
-            attribute_type = 'unknown'
-
-        attributes[column_name] = {
-            'label': column_name.replace('_', ' ').capitalize(),
-            'type': attribute_type
-        }
-        
-        if attribute_type == 'enum':
-            attributes[column_name]['options'] = options
-
+    attributes = {
+        'product_name': {'label': 'Nama Produk', 'type': 'string'},
+        'code': {'label': 'Kode Produk', 'type': 'string'},
+        'category': {'label': 'Kategori', 'type': 'enum', 'options': ['Bahan', 'Alat']},
+        'storage': {'label': 'Tempat Barang', 'type': 'string'},
+        'stock': {'label': 'Stock', 'type': 'number'},
+        'details': {'label': 'Detail', 'type': 'string'},
+        'created_at': {'label': 'Ditambahkan Pada', 'type': 'date'},
+        'updated_at': {'label': 'Diperbaharui Pada', 'type': 'date'}
+    }
     return jsonify(attributes)
 
 @product_routes.route('/apply_filters', methods=['POST'])
-@login_required
 def apply_filters():
-    filters = request.json 
+    filters = request.json.get('filters', [])
     query = Product.query
 
+    # Proses setiap grup filter
     for group in filters:
-        group_condition = group.get('group_condition', 'and')
-        for rule in group['rules']:
+        group_condition = group.get('condition', 'and')  # 'and' atau 'or'
+        rules = group.get('rules', [])
+        
+        # List untuk menyimpan kondisi
+        conditions = []
+
+        # Proses setiap aturan dalam grup
+        for rule in rules:
             attribute = rule['attribute']
             condition = rule['condition']
             value = rule['value']
 
-            if attribute == 'category' and condition == 'equals':
-                query = query.filter(Product.category == value)
-            elif attribute == 'stock' and condition == 'greater_than':
-                query = query.filter(Product.stock > value)
+            # Terapkan logika filtering untuk setiap kondisi
+            if attribute == 'product_name':
+                if condition == 'contains':
+                    conditions.append(Product.product_name.ilike(f'%{value}%'))
+                elif condition == 'equals':
+                    conditions.append(Product.product_name == value)
+                elif condition == 'starts_with':
+                    conditions.append(Product.product_name.ilike(f'{value}%'))
+                elif condition == 'ends_with':
+                    conditions.append(Product.product_name.ilike(f'%{value}'))
+            elif attribute == 'category':
+                if condition == 'equals':
+                    conditions.append(Product.category == value)
+            elif attribute == 'stock':
+                if condition == 'greater_than':
+                    conditions.append(Product.stock > int(value))
+                elif condition == 'less_than':
+                    conditions.append(Product.stock < int(value))
+                elif condition == 'equals':
+                    conditions.append(Product.stock == int(value))
+                elif condition == 'not_equals':
+                    conditions.append(Product.stock != int(value))
+        if conditions:
+            if group_condition == 'and':
+                query = query.filter(and_(*conditions))
+            elif group_condition == 'or':
+                query = query.filter(or_(*conditions))
 
     products = query.all()
-    return jsonify([product.to_dict() for product in products])
+
+    product_list = [{'product_name': p.product_name, 'category': p.category, 'stock': p.stock} for p in products]
+
+    return jsonify(product_list)
+
