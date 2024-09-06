@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from sqlalchemy import String, Integer, Enum, DateTime
 from models.product import Product, ProductType
 from database import db
-from sqlalchemy import inspect, and_, or_
+from sqlalchemy import inspect, and_, or_, func
 
 import os
 from werkzeug.utils import secure_filename
@@ -209,21 +209,25 @@ def apply_filters():
     filters = request.json.get('filters', [])
     query = Product.query
 
-    # Proses setiap grup filter
+    print(f"Received filters: {filters}", flush=True)  # Debugging input
+
+    # Process each filter group
     for group in filters:
-        group_condition = group.get('condition', 'and')  # 'and' atau 'or'
+        group_condition = group.get('condition', 'and')
         rules = group.get('rules', [])
         
-        # List untuk menyimpan kondisi
+        # List to hold conditions
         conditions = []
 
-        # Proses setiap aturan dalam grup
+        # Process each rule in the group
         for rule in rules:
             attribute = rule['attribute']
             condition = rule['condition']
             value = rule['value']
 
-            # Terapkan logika filtering untuk setiap kondisi
+            print(f"Processing rule - Attribute: {attribute}, Condition: {condition}, Value: {value}")  # Debugging
+
+            # Apply logic for filtering based on condition
             if attribute == 'product_name':
                 if condition == 'contains':
                     conditions.append(Product.product_name.ilike(f'%{value}%'))
@@ -233,9 +237,19 @@ def apply_filters():
                     conditions.append(Product.product_name.ilike(f'{value}%'))
                 elif condition == 'ends_with':
                     conditions.append(Product.product_name.ilike(f'%{value}'))
+                elif condition == 'not_equals':
+                    conditions.append(Product.product_name != value)
+                elif condition == 'is_empty':
+                    conditions.append(Product.product_name == None)
+                elif condition == 'is_not_empty':
+                    conditions.append(Product.product_name != None)
+
             elif attribute == 'category':
                 if condition == 'equals':
                     conditions.append(Product.category == value)
+                elif condition == 'not_equals':
+                    conditions.append(Product.category != value)
+
             elif attribute == 'stock':
                 if condition == 'greater_than':
                     conditions.append(Product.stock > int(value))
@@ -245,15 +259,88 @@ def apply_filters():
                     conditions.append(Product.stock == int(value))
                 elif condition == 'not_equals':
                     conditions.append(Product.stock != int(value))
+                elif condition == 'is_empty':
+                    conditions.append(Product.stock == 0)
+                elif condition == 'is_not_empty':
+                    conditions.append(Product.stock > 0)
+
+            elif attribute == 'created_at':
+                if condition == 'equals':
+                    conditions.append(func.DATE(Product.created_at) == value)
+                elif condition == 'before':
+                    conditions.append(column < value)
+                elif condition == 'after':
+                    conditions.append(column > value)
+                elif condition == 'between':
+                    start_date, end_date = value.split(',')
+                    conditions.append(column.between(start_date, end_date))
+                elif condition == 'is_empty':
+                    conditions.append(column == None)
+                elif condition == 'is_not_empty':
+                    conditions.append(column != None)
+
+            elif attribute == 'updated_at':
+                if condition == 'equals':
+                    conditions.append(func.DATE(Product.updated_at) == value)
+                elif condition == 'before':
+                    conditions.append(column < value)
+                elif condition == 'after':
+                    conditions.append(column > value)
+                elif condition == 'between':
+                    start_date, end_date = value.split(',')
+                    conditions.append(column.between(start_date, end_date))
+                elif condition == 'is_empty':
+                    conditions.append(column == None)
+                elif condition == 'is_not_empty':
+                    conditions.append(column != None)
+
+            elif attribute == 'code':
+                if condition in ['equals', 'is']:  # Aliaskan 'is' ke 'equals'
+                    conditions.append(Product.code == value)
+                elif condition == 'contains':
+                    conditions.append(Product.code.ilike(f'%{value}%'))
+                elif condition == 'starts_with':
+                    conditions.append(Product.code.ilike(f'{value}%'))
+                elif condition == 'ends_with':
+                    conditions.append(Product.code.ilike(f'%{value}'))
+                elif condition == 'not_equals':
+                    conditions.append(Product.code != value)
+                elif condition == 'is_empty':
+                    conditions.append(Product.code == None)
+                elif condition == 'is_not_empty':
+                    conditions.append(Product.code != None)
+            
+            elif attribute == 'storage':
+                if condition == 'equals':
+                    conditions.append(Product.storage == value)
+                elif condition == 'contains':
+                    conditions.append(Product.storage.ilike(f'%{value}%'))
+                elif condition == 'starts_with':
+                    conditions.append(Product.storage.ilike(f'{value}%'))
+                elif condition == 'ends_with':
+                    conditions.append(Product.storage.ilike(f'%{value}'))
+                elif condition == 'not_equals':
+                    conditions.append(Product.storage != value)
+                elif condition == 'is_empty':
+                    conditions.append(Product.storage == None)
+                elif condition == 'is_not_empty':
+                    conditions.append(Product.storage != None)
+
+        print(f"Conditions for group: {conditions}")  # Debugging condition list
+        
+        # Apply conditions based on group condition
         if conditions:
             if group_condition == 'and':
                 query = query.filter(and_(*conditions))
             elif group_condition == 'or':
                 query = query.filter(or_(*conditions))
 
+    # Execute query and return results
     products = query.all()
 
-    product_list = [{'product_name': p.product_name, 'category': p.category, 'stock': p.stock} for p in products]
+    print(f"Query result: {products}")  # Debugging query result
 
+    product_list = [{'product_name': p.product_name, 'category': p.category, 'stock': p.stock, 'code': p.code, 'storage': p.storage, 'details': p.details, 'created_at': p.created_at, 'updated_at': p.updated_at} for p in products]
+    
     return jsonify(product_list)
 

@@ -70,6 +70,9 @@
                                         <button id="initial-add-filter-group" class="btn btn-secondary">Add Filter Group</button>
                                         <button id="apply-filters" class="btn btn-primary">Apply Filters</button>
                                     </div>
+
+                                    <!-- Standalone rules outside groups -->
+                                    <div id="standalone-filter-rules"></div>
                                 </div>
                             </div>
                         </div>
@@ -225,6 +228,7 @@
             fetch('/get_filter_attributes')
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Filter attributes fetched:', data);
                     const attributeSelects = document.querySelectorAll('.attribute-select');
                     attributeSelects.forEach(select => {
                         // Populate attribute options
@@ -237,14 +241,19 @@
 
                         select.addEventListener('change', function() {
                             const selectedValue = this.value;
+                            console.log('Selected attribute:', selectedValue);
                             const selectedAttribute = data[selectedValue];
+                            console.log('Selected attribute details:', selectedAttribute);
                             const conditionSelect = this.parentElement.querySelector('.condition-select');
                             const valueInputContainer = this.parentElement.querySelector('.value-container');
 
                             conditionSelect.innerHTML = '';
-                            valueInputContainer.innerHTML = ''; 
+                            valueInputContainer.innerHTML = '';
+
+                            console.log('Selected attribute type:', selectedAttribute.type);
 
                             if (selectedAttribute.type === 'string') {
+                                console.log('Generating string conditions...');
                                 conditionSelect.innerHTML = `
                                     <option value="equals">Is</option>
                                     <option value="not_equals">Is not</option>
@@ -257,12 +266,14 @@
                                 `;
                                 valueInputContainer.innerHTML = `<input type="text" class="form-control value-input" placeholder="Enter value">`;
                             } else if (selectedAttribute.type === 'enum') {
+                                console.log('Generating enum conditions...');
                                 valueInputContainer.innerHTML = `
                                     <select class="form-control value-input">
                                         ${selectedAttribute.options.map(option => `<option value="${option}">${option}</option>`).join('')}
                                     </select>
                                 `;
                             } else if (selectedAttribute.type === 'number') {
+                                console.log('Generating number conditions...');
                                 conditionSelect.innerHTML = `
                                     <option value="equals">=</option>
                                     <option value="not_equals">#</option>
@@ -275,6 +286,7 @@
                                 `;
                                 valueInputContainer.innerHTML = `<input type="number" class="form-control value-input" placeholder="Enter number">`;
                             } else if (selectedAttribute.type === 'date') {
+                                console.log('Generating date conditions...');
                                 conditionSelect.innerHTML = `
                                     <option value="equals">Is</option>
                                     <option value="before">Before</option>
@@ -332,17 +344,20 @@
 
             filterRule.querySelector('.remove-rule').addEventListener('click', function() {
                 filterRule.remove();
+                console.log('Filter rule removed');
             });
 
             filterRule.querySelector('.duplicate-rule').addEventListener('click', function() {
                 const clonedRule = filterRule.cloneNode(true);
                 filterRule.parentElement.insertBefore(clonedRule, filterRule.nextSibling);
                 attachRuleHandlers(clonedRule);
+                console.log('Filter rule duplicated');
             });
 
             fetch('/get_filter_attributes')
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Filter attributes fetched:', data);
                     const select = filterRule.querySelector('.attribute-select');
                     select.innerHTML = '';
                     for (const [value, label] of Object.entries(data)) {
@@ -354,7 +369,9 @@
 
                     select.addEventListener('change', function() {
                         const selectedValue = this.value;
+                        console.log('Selected attribute:', selectedValue);
                         const selectedAttribute = data[selectedValue];
+                        console.log('Selected attribute details:', selectedAttribute);
                         const conditionSelect = filterRule.querySelector('.condition-select');
                         const valueInput = filterRule.querySelector('.value-input');
                         const valueInput2 = filterRule.querySelector('.value-input-2');
@@ -364,6 +381,7 @@
                         valueInput2.style.display = 'none';
 
                         if (selectedAttribute.type === 'string') {
+                            console.log('Generating string conditions...');
                             conditionSelect.innerHTML = `
                                 <option value="is">Is</option>
                                 <option value="is_not">Is not</option>
@@ -375,9 +393,11 @@
                                 <option value="is_not_empty">Is not empty</option>
                             `;
                         } else if (selectedAttribute.type === 'enum') {
+                            console.log('Generating enum conditions...');
                             conditionSelect.innerHTML = selectedAttribute.options.map(option => `<option value="${option}">${option}</option>`).join('');
                             valueInput.style.display = 'none';
                         } else if (selectedAttribute.type === 'number') {
+                            console.log('Generating number conditions...');
                             conditionSelect.innerHTML = `
                                 <option value="=">Equals</option>
                                 <option value="!=">Not equals</option>
@@ -389,6 +409,7 @@
                                 <option value="is_not_empty">Is not empty</option>
                             `;
                         } else if (selectedAttribute.type === 'date') {
+                            console.log('Generating date conditions...');
                             conditionSelect.innerHTML = `
                                 <option value="equals">Is</option>
                                 <option value="before">Before</option>
@@ -445,7 +466,9 @@
             const filterRulesContainer = filterGroup.querySelector('.filter-rules');
 
             filterGroup.querySelector('.add-filter-rule').addEventListener('click', function() {
-                filterRulesContainer.appendChild(createFilterRule());
+                const filterRule = createFilterRule();
+                filterRulesContainer.appendChild(filterRule);
+                console.log('Filter rule created within group:', filterRule); // Log setelah rule dibuat
             });
 
             filterGroup.querySelector('.add-filter-group').addEventListener('click', function() {
@@ -493,35 +516,61 @@
         });
 
         document.getElementById('initial-add-filter-rule').addEventListener('click', function() {
-            document.getElementById('filter-container').appendChild(createFilterRule());
+            const filterRule = createFilterRule();
+            document.getElementById('standalone-filter-rules').appendChild(filterRule); // Add to standalone rules
+            console.log('Standalone filter rule created:', filterRule); // Log after rule creation
         });
 
         document.getElementById('initial-add-filter-group').addEventListener('click', function() {
-            document.getElementById('filter-container').appendChild(createFilterGroup());
+            const filterGroup = createFilterGroup();
+            document.getElementById('filter-container').appendChild(filterGroup);
+            console.log('Filter group created:', filterGroup); // Log setelah group dibuat
         });
+
 
         document.getElementById('apply-filters').addEventListener('click', function() {
             const groups = document.querySelectorAll('.filter-group');
             const filterData = [];
 
-            console.log('Number of filter groups:', groups.length);
-
-            groups.forEach(group => {
-                const rules = group.querySelectorAll('.filter-rule');
-                const groupCondition = group.querySelector('.group-condition').value;
-                const groupData = { condition: groupCondition, rules: [] };
-
-                rules.forEach(rule => {
+            const standaloneRules = document.querySelectorAll('#standalone-filter-rules .filter-rule');
+            if (standaloneRules.length > 0) {
+                const standaloneGroup = { condition: 'and', rules: [] };
+                standaloneRules.forEach((rule, ruleIndex) => {
                     const attribute = rule.querySelector('.attribute-select').value;
                     const condition = rule.querySelector('.condition-select').value;
                     const value = rule.querySelector('.value-input') ? rule.querySelector('.value-input').value : '';
 
-                    console.log('Attribute:', attribute, 'Condition:', condition, 'Value:', value);
+                    console.log(`Standalone Rule ${ruleIndex + 1} - Attribute:`, attribute, 'Condition:', condition, 'Value:', value);
+
+                    if (attribute && condition && value.trim() !== '') {
+                        standaloneGroup.rules.push({ attribute, condition, value });
+                    } else {
+                        console.warn('Empty or invalid standalone filter rule:', { attribute, condition, value });
+                    }
+                });
+
+                if (standaloneGroup.rules.length > 0) {
+                    filterData.push(standaloneGroup);
+                }
+            }
+
+            groups.forEach((group, index) => {
+                const rules = group.querySelectorAll('.filter-rule');
+                const groupCondition = group.querySelector('.group-condition').value;
+                const groupData = { condition: groupCondition, rules: [] };
+
+                console.log(`Processing filter group ${index + 1} with condition:`, groupCondition);
+
+                rules.forEach((rule, ruleIndex) => {
+                    const attribute = rule.querySelector('.attribute-select').value;
+                    const condition = rule.querySelector('.condition-select').value;
+                    const value = rule.querySelector('.value-input') ? rule.querySelector('.value-input').value : '';
+
+                    console.log(`Group Rule ${ruleIndex + 1} - Attribute:`, attribute, 'Condition:', condition, 'Value:', value);
 
                     if (attribute && condition && value.trim() !== '') {
                         groupData.rules.push({ attribute, condition, value });
                     } else {
-                        // Log jika input kosong atau tidak valid
                         console.warn('Empty or invalid filter rule:', { attribute, condition, value });
                     }
                 });
@@ -531,9 +580,8 @@
                 }
             });
 
-            console.log('Filter data to be sent:', filterData);
+            console.log('Final filter data to be sent:', filterData);
 
-            // Kirim data ke backend menggunakan fetch
             fetch('/apply_filters', {
                 method: 'POST',
                 headers: {
@@ -543,8 +591,10 @@
             })
             .then(response => response.json())
             .then(data => {
-                // Tampilkan hasil yang difilter di sini
-                console.log('Filtered data:', data);
+                console.log('Filtered data received from backend:', data);
+            })
+            .catch(error => {
+                console.error('Error while sending filter data:', error);
             });
         });
 

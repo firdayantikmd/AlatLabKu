@@ -12,6 +12,7 @@ app.config['UPLOAD_FOLDER_CARD'] = 'static/card_photo'
 app.config['UPLOAD_FOLDER_PRODUCT'] = 'static/product_image'
 
 import logging
+logging.basicConfig(level=logging.DEBUG)
 
 @app.context_processor
 def inject_user():
