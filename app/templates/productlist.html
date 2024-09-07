@@ -313,8 +313,6 @@
                 });
         });
 
-        let groupCounter = 1;
-
         function createFilterRule() {
             const filterRule = document.createElement('div');
             filterRule.className = 'filter-rule';
@@ -530,58 +528,55 @@
 
 
         document.getElementById('apply-filters').addEventListener('click', function() {
-            const groups = document.querySelectorAll('.filter-group');
-            const filterData = [];
+            const filterData = {
+                condition: 'or',  // Top-level condition, this can be changed dynamically
+                rules: []
+            };
 
-            const standaloneRules = document.querySelectorAll('#standalone-filter-rules .filter-rule');
-            if (standaloneRules.length > 0) {
-                const standaloneGroup = { condition: 'and', rules: [] };
-                standaloneRules.forEach((rule, ruleIndex) => {
-                    const attribute = rule.querySelector('.attribute-select').value;
-                    const condition = rule.querySelector('.condition-select').value;
-                    const value = rule.querySelector('.value-input') ? rule.querySelector('.value-input').value : '';
-
-                    console.log(`Standalone Rule ${ruleIndex + 1} - Attribute:`, attribute, 'Condition:', condition, 'Value:', value);
-
-                    if (attribute && condition && value.trim() !== '') {
-                        standaloneGroup.rules.push({ attribute, condition, value });
-                    } else {
-                        console.warn('Empty or invalid standalone filter rule:', { attribute, condition, value });
-                    }
-                });
-
-                if (standaloneGroup.rules.length > 0) {
-                    filterData.push(standaloneGroup);
-                }
-            }
-
-            groups.forEach((group, index) => {
+            function processFilterGroup(group) {
                 const rules = group.querySelectorAll('.filter-rule');
-                const groupCondition = group.querySelector('.group-condition').value;
+                const groupCondition = group.querySelector('.group-condition').value; // Get 'and' or 'or' for current group
                 const groupData = { condition: groupCondition, rules: [] };
 
-                console.log(`Processing filter group ${index + 1} with condition:`, groupCondition);
-
-                rules.forEach((rule, ruleIndex) => {
+                // Process rules in the group
+                rules.forEach((rule) => {
                     const attribute = rule.querySelector('.attribute-select').value;
                     const condition = rule.querySelector('.condition-select').value;
                     const value = rule.querySelector('.value-input') ? rule.querySelector('.value-input').value : '';
-
-                    console.log(`Group Rule ${ruleIndex + 1} - Attribute:`, attribute, 'Condition:', condition, 'Value:', value);
 
                     if (attribute && condition && value.trim() !== '') {
                         groupData.rules.push({ attribute, condition, value });
-                    } else {
-                        console.warn('Empty or invalid filter rule:', { attribute, condition, value });
+                    }
+                });
+
+                // Process nested groups within the current group
+                const nestedGroups = group.querySelectorAll('.filter-group');
+                nestedGroups.forEach((nestedGroup) => {
+                    const nestedGroupData = processFilterGroup(nestedGroup);
+                    if (nestedGroupData) {
+                        groupData.rules.push(nestedGroupData);
                     }
                 });
 
                 if (groupData.rules.length > 0) {
-                    filterData.push(groupData);
+                    return groupData;
                 }
-            });
+                return null;
+            }
 
-            console.log('Final filter data to be sent:', filterData);
+            function collectFilterGroups() {
+                const groups = document.querySelectorAll('.filter-group');
+                groups.forEach(group => {
+                    const groupData = processFilterGroup(group);
+                    if (groupData) {
+                        filterData.rules.push(groupData);
+                    }
+                });
+            }
+
+            collectFilterGroups();
+
+            console.log('Final filter data:', filterData);
 
             fetch('/apply_filters', {
                 method: 'POST',
@@ -599,6 +594,7 @@
             });
         });
 
+        let groupCounter = 1;
     </script>
 
 </body>

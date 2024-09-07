@@ -204,32 +204,27 @@ def get_filter_attributes():
     }
     return jsonify(attributes)
 
-@product_routes.route('/apply_filters', methods=['POST'])
-def apply_filters():
-    filters = request.json.get('filters', [])
-    query = Product.query
-
-    print(f"Received filters: {filters}", flush=True)  # Debugging input
-
-    overall_conditions = []
-
-    # Process each filter group
-    for group in filters:
+def process_filter_group(group):
+    """Rekursif untuk memproses grup filter dan mengembalikan kondisi SQLAlchemy."""
+    
+    # Pastikan bahwa group adalah dictionary (untuk grup filter)
+    if isinstance(group, dict) and 'rules' in group and 'condition' in group:
         group_condition = group.get('condition', 'and')
         rules = group.get('rules', [])
-        
-        # List to hold conditions
         conditions = []
 
-        # Process each rule in the group
         for rule in rules:
-            attribute = rule['attribute']
-            condition = rule['condition']
-            value = rule['value']
+            if isinstance(rule, dict) and 'rules' in rule:
+                # Jika ini adalah nested group, proses secara rekursif
+                nested_group_condition = process_filter_group(rule)
+                if nested_group_condition:
+                    conditions.append(nested_group_condition)
+            else:
+                # Jika ini adalah aturan individu, proses kondisi normal
+                attribute = rule.get('attribute')
+                condition = rule.get('condition')
+                value = rule.get('value')
 
-            print(f"Processing rule - Attribute: {attribute}, Condition: {condition}, Value: {value}")  # Debugging
-
-            # Apply logic for filtering based on condition
             if attribute == 'product_name':
                 if condition == 'contains':
                     conditions.append(Product.product_name.ilike(f'%{value}%'))
@@ -328,24 +323,51 @@ def apply_filters():
                 elif condition == 'is_not_empty':
                     conditions.append(Product.storage != None)
 
-        print(f"Conditions for group: {conditions}")  # Debugging condition list
-        
-        # Apply conditions based on group condition
+    # Gabungkan kondisi menggunakan 'and' atau 'or' sesuai dengan kondisi grup
         if conditions:
             if group_condition == 'and':
-                query = query.filter(and_(*conditions))
+                return and_(*conditions)
             elif group_condition == 'or':
-                query = query.filter(or_(*conditions))
-    
-    if overall_conditions:
-        query = query.filter(or_(*overall_conditions))
+                return or_(*conditions)
 
-    # Execute query and return results
+    # Jika input bukan grup yang valid, kembalikan None
+    return None
+
+@product_routes.route('/apply_filters', methods=['POST'])
+def apply_filters():
+    filters = request.json.get('filters', [])
+    query = Product.query
+
+    print(f"Received filters: {filters}", flush=True)
+
+    # Mulai dengan kondisi global
+    overall_conditions = []
+
+    # Proses setiap grup filter menggunakan fungsi rekursif
+    for group in filters:
+        group_condition = process_filter_group(group)
+        if group_condition is not None:
+            overall_conditions.append(group_condition)
+
+    # Gabungkan kondisi berdasarkan logika (menggunakan `and_` atau `or_`)
+    if overall_conditions:
+        query = query.filter(and_(*overall_conditions))  # Gabungkan dengan `and_` atau `or_`, sesuai kebutuhan
+
+    # Eksekusi query dan kembalikan hasil
     products = query.all()
 
-    print(f"Query result: {products}")  # Debugging query result
-
-    product_list = [{'product_name': p.product_name, 'category': p.category, 'stock': p.stock, 'code': p.code, 'storage': p.storage, 'details': p.details, 'created_at': p.created_at, 'updated_at': p.updated_at} for p in products]
+    product_list = [
+        {
+            'product_name': p.product_name, 
+            'category': p.category, 
+            'stock': p.stock, 
+            'code': p.code, 
+            'storage': p.storage, 
+            'details': p.details, 
+            'created_at': p.created_at, 
+            'updated_at': p.updated_at
+        }
+        for p in products
+    ]
     
     return jsonify(product_list)
-
