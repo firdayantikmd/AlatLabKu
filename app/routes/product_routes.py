@@ -209,8 +209,8 @@ def process_filter_group(group):
     
     # Pastikan bahwa group adalah dictionary (untuk grup filter)
     if isinstance(group, dict) and 'rules' in group and 'condition' in group:
-        group_condition = group.get('condition', 'and')
-        rules = group.get('rules', [])
+        group_condition = group.get('condition', 'and')  # Dapatkan kondisi grup ('and' atau 'or')
+        rules = group.get('rules', [])  # Dapatkan aturan dalam grup
         conditions = []
 
         for rule in rules:
@@ -220,7 +220,7 @@ def process_filter_group(group):
                 if nested_group_condition:
                     conditions.append(nested_group_condition)
             else:
-                # Jika ini adalah aturan individu, proses kondisi normal
+                # Proses aturan individu
                 attribute = rule.get('attribute')
                 condition = rule.get('condition')
                 value = rule.get('value')
@@ -323,37 +323,39 @@ def process_filter_group(group):
                 elif condition == 'is_not_empty':
                     conditions.append(Product.storage != None)
 
-    # Gabungkan kondisi menggunakan 'and' atau 'or' sesuai dengan kondisi grup
         if conditions:
             if group_condition == 'and':
                 return and_(*conditions)
             elif group_condition == 'or':
                 return or_(*conditions)
 
-    # Jika input bukan grup yang valid, kembalikan None
     return None
 
 @product_routes.route('/apply_filters', methods=['POST'])
 def apply_filters():
-    filters = request.json.get('filters', [])
+    filters = request.json.get('filters', {})
     query = Product.query
 
     print(f"Received filters: {filters}", flush=True)
 
-    # Mulai dengan kondisi global
+    global_condition = filters.get('condition', 'or')
+    groups = filters.get('rules', [])
+
     overall_conditions = []
 
-    # Proses setiap grup filter menggunakan fungsi rekursif
-    for group in filters:
+    for group in groups:
         group_condition = process_filter_group(group)
         if group_condition is not None:
             overall_conditions.append(group_condition)
 
-    # Gabungkan kondisi berdasarkan logika (menggunakan `and_` atau `or_`)
-    if overall_conditions:
-        query = query.filter(and_(*overall_conditions))  # Gabungkan dengan `and_` atau `or_`, sesuai kebutuhan
+    print(f"Overall conditions: {overall_conditions}", flush=True)
 
-    # Eksekusi query dan kembalikan hasil
+    if overall_conditions:
+        if global_condition == 'or':
+            query = query.filter(or_(*overall_conditions))
+        elif global_condition == 'and':
+            query = query.filter(and_(*overall_conditions))
+
     products = query.all()
 
     product_list = [
