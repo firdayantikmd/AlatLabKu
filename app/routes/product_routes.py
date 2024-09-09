@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
-from sqlalchemy import String, Integer, Enum, DateTime
+from sqlalchemy import String, Integer, Enum, DateTime, cast
 from models.product import Product, ProductType
 from database import db
 from sqlalchemy import inspect, and_, or_, func
@@ -68,25 +68,32 @@ def add_product():
 @product_routes.route('/productlist', methods=['GET'])
 @login_required
 def get_productlist():
-    products = Product.query.all()
+    product_name = request.args.get('product_name', '')
+    category = request.args.get('category', '')
+    stock_status = request.args.get('stock_status', '')
+
+    # mulai query dari table product
+    query = Product.query
+
+    # filter untuk nama produk jika ada input
+    if product_name:
+        query = query.filter(Product.product_name.ilike(f'%{product_name}%'))
+    
+    # filter untuk kategori jika ada input
+    if category:
+        query = query.filter(cast(Product.category, String).ilike(f'%{category}%'))
+
+    # filter untuk stok jika ada input
+    if stock_status:
+        if stock_status == 'available':
+            query = query.filter(Product.stock > 0)
+        elif stock_status == 'unavailable':
+            query = query.filter(Product.stock <= 0)
+
+    # jalankan query dan ambil hasil
+    products = query.all()
+
     return render_template('productlist.html', products=products)
-    # page = request.args.get('page', 1, type=int)
-    # per_page = request.args.get('per_page', 10, type=int)
-
-    # search_term = request.args.get('search', '')
-    # query = Product.query
-
-    # if search_term:
-    #     search_pattern = f"%{search_term}%"
-    #     query = query.filter(
-    #         Product.product_name.ilike(search_pattern) |
-    #         Product.category.ilike(search_pattern)
-    #     )
-
-    # pagination = query.paginate(page=page, per_page=per_page, error_out=False)
-    # products = pagination.items
-
-    # return render_template('productlist.html', products=products, pagination=pagination)
 
 @product_routes.route('/productdetails/<int:id>')
 @login_required
@@ -156,220 +163,3 @@ def delete_product(id):
 
     flash("Product deleted successfully!", "success")
     return redirect(url_for('product_routes.get_productlist'))
-
-# @product_routes.route('/get_filter_attributes', methods=['GET'])
-# @login_required
-# def get_filter_attributes():
-#     inspector = inspect(Product)
-#     attributes = {}
-
-#     for column in inspector.columns:
-#         column_name = column.name
-#         column_type = column.type
-
-#         if isinstance(column_type, String):
-#             attribute_type = 'string'
-#         elif isinstance(column_type, Integer):
-#             attribute_type = 'number'
-#         elif isinstance(column_type, Enum):
-#             attribute_type = 'enum'
-#             options = column_type.enums
-#         elif isinstance(column_type, DateTime):
-#             attribute_type = 'date'
-#         else:
-#             attribute_type = 'unknown'
-
-#         attributes[column_name] = {
-#             'label': column_name.replace('_', ' ').capitalize(),
-#             'type': attribute_type
-#         }
-        
-#         if attribute_type == 'enum':
-#             attributes[column_name]['options'] = options
-
-#     return jsonify(attributes)
-
-@product_routes.route('/get_filter_attributes', methods=['GET'])
-@login_required
-def get_filter_attributes():
-    attributes = {
-        'product_name': {'label': 'Nama Produk', 'type': 'string'},
-        'code': {'label': 'Kode Produk', 'type': 'string'},
-        'category': {'label': 'Kategori', 'type': 'enum', 'options': ['Bahan', 'Alat']},
-        'storage': {'label': 'Tempat Barang', 'type': 'string'},
-        'stock': {'label': 'Stock', 'type': 'number'},
-        'details': {'label': 'Detail', 'type': 'string'},
-        'created_at': {'label': 'Ditambahkan Pada', 'type': 'date'},
-        'updated_at': {'label': 'Diperbaharui Pada', 'type': 'date'}
-    }
-    return jsonify(attributes)
-
-def process_filter_group(group):
-    """Rekursif untuk memproses grup filter dan mengembalikan kondisi SQLAlchemy."""
-    
-    # Pastikan bahwa group adalah dictionary (untuk grup filter)
-    if isinstance(group, dict) and 'rules' in group and 'condition' in group:
-        group_condition = group.get('condition', 'and')  # Dapatkan kondisi grup ('and' atau 'or')
-        rules = group.get('rules', [])  # Dapatkan aturan dalam grup
-        conditions = []
-
-        for rule in rules:
-            if isinstance(rule, dict) and 'rules' in rule:
-                # Jika ini adalah nested group, proses secara rekursif
-                nested_group_condition = process_filter_group(rule)
-                if nested_group_condition:
-                    conditions.append(nested_group_condition)
-            else:
-                # Proses aturan individu
-                attribute = rule.get('attribute')
-                condition = rule.get('condition')
-                value = rule.get('value')
-
-            if attribute == 'product_name':
-                if condition == 'contains':
-                    conditions.append(Product.product_name.ilike(f'%{value}%'))
-                elif condition == 'equals':
-                    conditions.append(Product.product_name == value)
-                elif condition == 'starts_with':
-                    conditions.append(Product.product_name.ilike(f'{value}%'))
-                elif condition == 'ends_with':
-                    conditions.append(Product.product_name.ilike(f'%{value}'))
-                elif condition == 'not_equals':
-                    conditions.append(Product.product_name != value)
-                elif condition == 'is_empty':
-                    conditions.append(Product.product_name == None)
-                elif condition == 'is_not_empty':
-                    conditions.append(Product.product_name != None)
-
-            elif attribute == 'category':
-                if condition == 'equals':
-                    conditions.append(Product.category == value)
-                elif condition == 'not_equals':
-                    conditions.append(Product.category != value)
-
-            elif attribute == 'stock':
-                if condition == 'greater_than':
-                    conditions.append(Product.stock > int(value))
-                elif condition == 'less_than':
-                    conditions.append(Product.stock < int(value))
-                elif condition == 'equals':
-                    conditions.append(Product.stock == int(value))
-                elif condition == 'not_equals':
-                    conditions.append(Product.stock != int(value))
-                elif condition == 'is_empty':
-                    conditions.append(Product.stock == 0)
-                elif condition == 'is_not_empty':
-                    conditions.append(Product.stock > 0)
-
-            elif attribute == 'created_at':
-                if condition == 'equals':
-                    conditions.append(func.DATE(Product.created_at) == value)
-                elif condition == 'before':
-                    conditions.append(column < value)
-                elif condition == 'after':
-                    conditions.append(column > value)
-                elif condition == 'between':
-                    start_date, end_date = value.split(',')
-                    conditions.append(column.between(start_date, end_date))
-                elif condition == 'is_empty':
-                    conditions.append(column == None)
-                elif condition == 'is_not_empty':
-                    conditions.append(column != None)
-
-            elif attribute == 'updated_at':
-                if condition == 'equals':
-                    conditions.append(func.DATE(Product.updated_at) == value)
-                elif condition == 'before':
-                    conditions.append(column < value)
-                elif condition == 'after':
-                    conditions.append(column > value)
-                elif condition == 'between':
-                    start_date, end_date = value.split(',')
-                    conditions.append(column.between(start_date, end_date))
-                elif condition == 'is_empty':
-                    conditions.append(column == None)
-                elif condition == 'is_not_empty':
-                    conditions.append(column != None)
-
-            elif attribute == 'code':
-                if condition in ['equals', 'is']:  # Aliaskan 'is' ke 'equals'
-                    conditions.append(Product.code == value)
-                elif condition == 'contains':
-                    conditions.append(Product.code.ilike(f'%{value}%'))
-                elif condition == 'starts_with':
-                    conditions.append(Product.code.ilike(f'{value}%'))
-                elif condition == 'ends_with':
-                    conditions.append(Product.code.ilike(f'%{value}'))
-                elif condition == 'not_equals':
-                    conditions.append(Product.code != value)
-                elif condition == 'is_empty':
-                    conditions.append(Product.code == None)
-                elif condition == 'is_not_empty':
-                    conditions.append(Product.code != None)
-            
-            elif attribute == 'storage':
-                if condition == 'equals':
-                    conditions.append(Product.storage == value)
-                elif condition == 'contains':
-                    conditions.append(Product.storage.ilike(f'%{value}%'))
-                elif condition == 'starts_with':
-                    conditions.append(Product.storage.ilike(f'{value}%'))
-                elif condition == 'ends_with':
-                    conditions.append(Product.storage.ilike(f'%{value}'))
-                elif condition == 'not_equals':
-                    conditions.append(Product.storage != value)
-                elif condition == 'is_empty':
-                    conditions.append(Product.storage == None)
-                elif condition == 'is_not_empty':
-                    conditions.append(Product.storage != None)
-
-        if conditions:
-            if group_condition == 'and':
-                return and_(*conditions)
-            elif group_condition == 'or':
-                return or_(*conditions)
-
-    return None
-
-@product_routes.route('/apply_filters', methods=['POST'])
-def apply_filters():
-    filters = request.json.get('filters', {})
-    query = Product.query
-
-    print(f"Received filters: {filters}", flush=True)
-
-    global_condition = filters.get('condition', 'or')
-    groups = filters.get('rules', [])
-
-    overall_conditions = []
-
-    for group in groups:
-        group_condition = process_filter_group(group)
-        if group_condition is not None:
-            overall_conditions.append(group_condition)
-
-    print(f"Overall conditions: {overall_conditions}", flush=True)
-
-    if overall_conditions:
-        if global_condition == 'or':
-            query = query.filter(or_(*overall_conditions))
-        elif global_condition == 'and':
-            query = query.filter(and_(*overall_conditions))
-
-    products = query.all()
-
-    product_list = [
-        {
-            'product_name': p.product_name, 
-            'category': p.category, 
-            'stock': p.stock, 
-            'code': p.code, 
-            'storage': p.storage, 
-            'details': p.details, 
-            'created_at': p.created_at, 
-            'updated_at': p.updated_at
-        }
-        for p in products
-    ]
-    
-    return jsonify(product_list)

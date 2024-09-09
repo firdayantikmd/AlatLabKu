@@ -62,63 +62,40 @@
                             <img src="static/img/icons/filter1.svg" alt="img">
                         </a>
 
+                        <!-- filter form hidden -->
                         <div class="card mb-0" id="filter_inputs" style="display: none;">
                             <div class="card-body pb-0">
-                                <div id="filter-container">
-                                    <div>
-                                        <button id="initial-add-filter-rule" class="btn btn-secondary">Add Filter Rule</button>
-                                        <button id="initial-add-filter-group" class="btn btn-secondary">Add Filter Group</button>
-                                        <button id="apply-filters" class="btn btn-primary">Apply Filters</button>
-                                        <select class="form-control top-level-condition-select" id="top-level-condition">
-                                            <option value="and">And</option>
-                                            <option value="or">Or</option>
-                                        </select>                                     
+                                <form method="GET" action="{{ url_for('product_routes.get_productlist') }}">
+                                    <div class="row">
+                                        <div class="col-lg-2 col-md-6 col-sm-12 mb-3">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" name="product_name" placeholder="Product Name">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-6 col-sm-12 mb-3">
+                                            <div class="form-group">
+                                                <input type="text" class="form-control" name="category" placeholder="Category">
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-6 col-sm-12 mb-3">
+                                            <div class="form-group">
+                                                <select class="form-control" name="stock_status">
+                                                    <option value="">Stock Status</option>
+                                                    <option value="available">Tersedia</option>
+                                                    <option value="unavailable">Tidak Tersedia</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-2 col-md-6 col-sm-12 mb-3">
+                                            <button type="submit" class="btn btn-primary w-100">Filter</button>
+                                        </div>
                                     </div>
-
-                                    <!-- Standalone rules outside groups -->
-                                    <div id="standalone-filter-rules"></div>
-                                </div>
+                                </form>
                             </div>
                         </div>
-                        <!-- <div class="table-top">
-                            <div class="search-set">
-                                <div class="search-input">
-                                    <a class="btn btn-searchset"><img src="static/img/icons/search-white.svg" alt="img"></a>
-                                </div>
-                            </div>
-                        </div> -->
                         
                         <div class="card mb-0" id="filter_inputs">
                             <div class="card-body pb-0">
-                                <!-- <div class="row">
-                                    <div class="col-lg-12 col-sm-12">
-                                        <div class="row">
-                                            <div class="col-lg col-sm-6 col-12">
-                                                <div class="form-group">
-                                                    <label for="">Pilih Nama Produk</label>
-                                                    <select class="select">
-                                                        <option>Macbook pro</option>
-                                                        <option>Orange</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg col-sm-6 col-12">
-                                                <div class="form-group">
-                                                    <label for="">Pilih Kategori</label>
-                                                    <select class="select">
-                                                        <option>Alat</option>
-                                                        <option>Bahan</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-1 col-sm-6 col-12">
-                                                <div class="form-group">
-                                                    <a class="btn btn-filters ms-auto"><img src="static/img/icons/search-whites.svg" alt="img"></a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> -->
                                 <div class="row">
                                     <div class="col-lg-2 col-sm-6 col-12">
                                         <div class="form-group">
@@ -228,407 +205,13 @@
             });
         }
 
-        let filterData; // Deklarasi variabel filterData di lingkup global
-
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/get_filter_attributes')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Filter attributes fetched:', data);
-                    const attributeSelects = document.querySelectorAll('.attribute-select');
-                    attributeSelects.forEach(select => {
-                        // Populate attribute options
-                        for (const [value, details] of Object.entries(data)) {
-                            const option = document.createElement('option');
-                            option.value = value;
-                            option.textContent = details.label;
-                            select.appendChild(option);
-                        }
-
-                        select.addEventListener('change', function() {
-                            const selectedValue = this.value;
-                            console.log('Selected attribute:', selectedValue);
-                            const selectedAttribute = data[selectedValue];
-                            console.log('Selected attribute details:', selectedAttribute);
-                            const conditionSelect = this.parentElement.querySelector('.condition-select');
-                            const valueInputContainer = this.parentElement.querySelector('.value-container');
-
-                            conditionSelect.innerHTML = '';
-                            valueInputContainer.innerHTML = '';
-
-                            console.log('Selected attribute type:', selectedAttribute.type);
-
-                            if (selectedAttribute.type === 'string') {
-                                console.log('Generating string conditions...');
-                                conditionSelect.innerHTML = `
-                                    <option value="equals">Is</option>
-                                    <option value="not_equals">Is not</option>
-                                    <option value="contains">Contains</option>
-                                    <option value="not_contains">Does not contain</option>
-                                    <option value="starts_with">Starts with</option>
-                                    <option value="ends_with">Ends with</option>
-                                    <option value="is_empty">Is empty</option>
-                                    <option value="is_not_empty">Is not empty</option>
-                                `;
-                                valueInputContainer.innerHTML = `<input type="text" class="form-control value-input" placeholder="Enter value">`;
-                            } else if (selectedAttribute.type === 'enum') {
-                                console.log('Generating enum conditions...');
-                                conditionSelect.innerHTML = `
-                                    <option value="equals">Is</option>
-                                    <option value="not_equals">Is not</option>
-                                `;
-                            } else if (selectedAttribute.type === 'number') {
-                                console.log('Generating number conditions...');
-                                conditionSelect.innerHTML = `
-                                    <option value="equals">=</option>
-                                    <option value="not_equals">#</option>
-                                    <option value="greater_than">></option>
-                                    <option value="less_than"><</option>
-                                    <option value="greater_than_or_equal">>=</option>
-                                    <option value="less_than_or_equal"><=</option>
-                                    <option value="is_empty">Is empty</option>
-                                    <option value="is_not_empty">Is not empty</option>
-                                `;
-                                valueInputContainer.innerHTML = `<input type="number" class="form-control value-input" placeholder="Enter number">`;
-                            } else if (selectedAttribute.type === 'date') {
-                                console.log('Generating date conditions...');
-                                conditionSelect.innerHTML = `
-                                    <option value="equals">Is</option>
-                                    <option value="before">Before</option>
-                                    <option value="after">After</option>
-                                    <option value="between">Between</option>
-                                    <option value="is_empty">Is empty</option>
-                                    <option value="is_not_empty">Is not empty</option>
-                                `;
-                                valueInputContainer.innerHTML = `
-                                    <input type="date" class="form-control value-input" placeholder="Select date">
-                                    <input type="date" class="form-control value-input-2" style="display: none;" placeholder="Second date">
-                                `;
-
-                                conditionSelect.addEventListener('change', function() {
-                                    const valueInput2 = valueInputContainer.querySelector('.value-input-2');
-                                    if (this.value === 'between') {
-                                        valueInput2.style.display = 'inline-block';
-                                    } else {
-                                        valueInput2.style.display = 'none';
-                                    }
-                                });
-                            }
-                        });
-                    });
-                });
-        });
-
-        function createFilterRule() {
-            const filterRule = document.createElement('div');
-            filterRule.className = 'filter-rule';
-
-            filterRule.innerHTML = `
-                <div class="d-flex align-items-center mt-2">
-                    <select class="form-control me-2 attribute-select">
-                        <!-- Options will be dynamically populated -->
-                    </select>
-                    <select class="form-control me-2 condition-select">
-                        <!-- Conditions will be dynamically populated based on the attribute type -->
-                    </select>
-                    <input type="text" class="form-control me-2 value-input" placeholder="Value">
-                    <input type="text" class="form-control me-2 value-input-2" style="display: none;" placeholder="Second Value">
-                    <div class="dropdown">
-                        <button class="btn btn-light" type="button" id="ruleOptions" data-bs-toggle="dropdown" aria-expanded="false">
-                            &bull;&bull;&bull;
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="ruleOptions">
-                            <li><a class="dropdown-item remove-rule" href="#">Remove</a></li>
-                            <li><a class="dropdown-item duplicate-rule" href="#">Duplicate</a></li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-
-            filterRule.querySelector('.remove-rule').addEventListener('click', function() {
-                filterRule.remove();
-                console.log('Filter rule removed');
-            });
-
-            filterRule.querySelector('.duplicate-rule').addEventListener('click', function() {
-                const clonedRule = filterRule.cloneNode(true);
-                filterRule.parentElement.insertBefore(clonedRule, filterRule.nextSibling);
-                attachRuleHandlers(clonedRule);
-                console.log('Filter rule duplicated');
-            });
-
-            fetch('/get_filter_attributes')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Filter attributes fetched:', data);
-                    const select = filterRule.querySelector('.attribute-select');
-                    select.innerHTML = '';
-                    for (const [value, label] of Object.entries(data)) {
-                        const option = document.createElement('option');
-                        option.value = value;
-                        option.textContent = label.label;
-                        select.appendChild(option);
-                    }
-
-                    select.addEventListener('change', function() {
-                        const selectedValue = this.value;
-                        console.log('Selected attribute:', selectedValue);
-                        const selectedAttribute = data[selectedValue];
-                        console.log('Selected attribute details:', selectedAttribute);
-                        const conditionSelect = filterRule.querySelector('.condition-select');
-                        const valueInput = filterRule.querySelector('.value-input');
-                        const valueInput2 = filterRule.querySelector('.value-input-2');
-
-                        conditionSelect.innerHTML = '';
-                        valueInput.style.display = 'inline-block';
-                        valueInput2.style.display = 'none';
-
-                        if (selectedAttribute.type === 'string') {
-                            console.log('Generating string conditions...');
-                            conditionSelect.innerHTML = `
-                                <option value="is">Is</option>
-                                <option value="is_not">Is not</option>
-                                <option value="contains">Contains</option>
-                                <option value="does_not_contain">Does not contain</option>
-                                <option value="starts_with">Starts with</option>
-                                <option value="ends_with">Ends with</option>
-                                <option value="is_empty">Is empty</option>
-                                <option value="is_not_empty">Is not empty</option>
-                            `;
-                        } else if (selectedAttribute.type === 'enum') {
-                            console.log('Generating enum conditions...');
-                            conditionSelect.innerHTML = `
-                                <option value="equals">Is</option>
-                                <option value="not_equals">Is not</option>
-                            `;
-                        } else if (selectedAttribute.type === 'number') {
-                            console.log('Generating number conditions...');
-                            conditionSelect.innerHTML = `
-                                <option value="=">Equals</option>
-                                <option value="!=">Not equals</option>
-                                <option value=">">Greater than</option>
-                                <option value="<">Less than</option>
-                                <option value=">=">Greater than or equal</option>
-                                <option value="<=">Less than or equal</option>
-                                <option value="is_empty">Is empty</option>
-                                <option value="is_not_empty">Is not empty</option>
-                            `;
-                        } else if (selectedAttribute.type === 'date') {
-                            console.log('Generating date conditions...');
-                            conditionSelect.innerHTML = `
-                                <option value="equals">Is</option>
-                                <option value="before">Before</option>
-                                <option value="after">After</option>
-                                <option value="between">Between</option>
-                                <option value="is_empty">Is empty</option>
-                                <option value="is_not_empty">Is not empty</option>
-                            `;
-                            valueInput.type = 'date';
-
-                            conditionSelect.addEventListener('change', function() {
-                                if (this.value === 'between') {
-                                    valueInput2.style.display = 'inline-block';
-                                    valueInput2.type = 'date';
-                                } else {
-                                    valueInput2.style.display = 'none';
-                                }
-                            });
-                        }
-                    });
-                });
-
-            return filterRule;
-        }
-
-        function createFilterGroup() {
-            const filterGroup = document.createElement('div');
-            filterGroup.id = `filter-group-${groupCounter++}`;
-            filterGroup.className = 'filter-group card';
-
-            filterGroup.innerHTML = `
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <select class="form-control me-2 group-condition"> <!-- Pastikan elemen ini ada -->
-                            <option value="and">And</option>
-                            <option value="or">Or</option>
-                        </select>
-                        <button class="btn btn-secondary me-2 add-filter-rule">Add Filter Rule</button>
-                        <button class="btn btn-secondary me-2 add-filter-group">Add Filter Group</button>
-                        <div class="dropdown">
-                            <button class="btn btn-light" type="button" id="groupOptions" data-bs-toggle="dropdown" aria-expanded="false">
-                                &bull;&bull;&bull;
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="groupOptions">
-                                <li><a class="dropdown-item remove-group" href="#">Remove</a></li>
-                                <li><a class="dropdown-item duplicate-group" href="#">Duplicate</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="filter-rules"></div>
-                </div>
-            `;
-
-            const filterRulesContainer = filterGroup.querySelector('.filter-rules');
-
-            filterGroup.querySelector('.add-filter-rule').addEventListener('click', function() {
-                const filterRule = createFilterRule();
-                filterRulesContainer.appendChild(filterRule);
-                console.log('Filter rule created within group:', filterRule);
-            });
-
-            filterGroup.querySelector('.add-filter-group').addEventListener('click', function() {
-                filterRulesContainer.appendChild(createFilterGroup());
-            });
-
-            filterGroup.querySelector('.remove-group').addEventListener('click', function() {
-                filterGroup.remove();
-            });
-
-            filterGroup.querySelector('.duplicate-group').addEventListener('click', function() {
-                const clonedGroup = filterGroup.cloneNode(true);
-                filterGroup.parentElement.insertBefore(clonedGroup, filterGroup.nextSibling);
-                attachGroupHandlers(clonedGroup);
-            });
-
-            return filterGroup;
-        }
-
-        function attachGroupHandlers(group) {
-            const filterRulesContainer = group.querySelector('.filter-rules');
-
-            group.querySelector('.add-filter-rule').addEventListener('click', function() {
-                filterRulesContainer.appendChild(createFilterRule());
-            });
-
-            group.querySelector('.add-filter-group').addEventListener('click', function() {
-                filterRulesContainer.appendChild(createFilterGroup());
-            });
-
-            group.querySelector('.remove-group').addEventListener('click', function() {
-                group.remove();
-            });
-
-            group.querySelector('.duplicate-group').addEventListener('click', function() {
-                const clonedGroup = group.cloneNode(true);
-                group.parentElement.insertBefore(clonedGroup, group.nextSibling);
-                attachGroupHandlers(clonedGroup);
-            });
-        }
-
         document.getElementById('filter-icon').addEventListener('click', function() {
-            const filterInputs = document.getElementById('filter_inputs');
-            filterInputs.style.display = filterInputs.style.display === 'none' ? 'block' : 'none';
-        });
-
-        document.getElementById('initial-add-filter-rule').addEventListener('click', function() {
-            const filterRule = createFilterRule();
-            document.getElementById('standalone-filter-rules').appendChild(filterRule);
-            console.log('Standalone filter rule created:', filterRule);
-        });
-
-        document.getElementById('initial-add-filter-group').addEventListener('click', function() {
-            const filterGroup = createFilterGroup();
-            document.getElementById('filter-container').appendChild(filterGroup);
-            console.log('Filter group created:', filterGroup);
-        });
-
-        function processFilterGroup(group) {
-            const rules = group.querySelectorAll('.filter-rule');
-            const groupCondition = group.querySelector('.group-condition'); // Ambil elemen select kondisi grup
-
-            // Pastikan elemen groupCondition ada sebelum mengakses 'value'
-            if (!groupCondition) {
-                console.error('Group condition element not found in group:', group);
-                return null;
+            var filterInputs = document.getElementById('filter_inputs');
+            if (filterInputs.style.display === "none") {
+                filterInputs.style.display = "block";
+            } else {
+                filterInputs.style.display = "none";
             }
-
-            const groupData = { condition: groupCondition.value, rules: [] };
-
-            // Proses aturan (rules) di dalam grup
-            rules.forEach((rule) => {
-                const attributeSelect = rule.querySelector('.attribute-select');
-                const conditionSelect = rule.querySelector('.condition-select');
-                const valueInput = rule.querySelector('.value-input');
-
-                // Pastikan semua elemen yang diperlukan ada sebelum mengakses 'value'
-                if (!attributeSelect || !conditionSelect || !valueInput) {
-                    console.error('One or more elements are missing in rule:', rule);
-                    return;
-                }
-
-                const attribute = attributeSelect.value;
-                const condition = conditionSelect.value;
-                const value = valueInput ? valueInput.value : '';
-
-                // Pastikan semua elemen memiliki nilai yang valid sebelum dimasukkan ke dalam groupData
-                if (attribute && condition && value.trim() !== '') {
-                    groupData.rules.push({ attribute, condition, value });
-                }
-            });
-
-            // Proses nested group (grup di dalam grup)
-            const nestedGroups = group.querySelectorAll('.filter-group');
-            nestedGroups.forEach((nestedGroup) => {
-                const nestedGroupData = processFilterGroup(nestedGroup); // Rekursi untuk menangani nested group
-                if (nestedGroupData) {
-                    groupData.rules.push(nestedGroupData);
-                }
-            });
-
-            // Hanya kembalikan groupData jika ada aturan yang valid
-            if (groupData.rules.length > 0) {
-                return groupData;
-            }
-            return null;
-        }
-
-        function collectFilterGroups() {
-            const groups = document.querySelectorAll('.filter-group');
-            groups.forEach(group => {
-                const groupData = processFilterGroup(group);
-                if (groupData) {
-                    filterData.rules.push(groupData);
-                }
-            });
-        }
-
-        let groupCounter = 0;
-
-        document.getElementById('apply-filters').addEventListener('click', function() {
-            // Cek apakah elemen .top-level-condition-select ada di DOM
-            const conditionSelect = document.querySelector('.top-level-condition-select');
-            
-            // Jika elemen tidak ditemukan, berikan pesan error yang jelas
-            if (!conditionSelect) {
-                console.error('Dropdown for selecting top-level condition (And/Or) is not found in the DOM.');
-                return;
-            }
-            
-            const topLevelCondition = conditionSelect.value; // Mengakses nilai elemen jika ada
-
-            filterData = { // Inisialisasi filterData berdasarkan kondisi input user
-                condition: topLevelCondition, // Ini bisa or/and, tergantung input user
-                rules: []
-            };
-
-            collectFilterGroups(); // Mengumpulkan semua filter group dan rule
-
-            console.log('Final filter data:', filterData); // Debug untuk memastikan struktur filter benar
-
-            fetch('/apply_filters', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ filters: filterData }) // Mengirim data filter ke backend
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Filtered data received from backend:', data); // Tampilkan hasil filter
-            })
-            .catch(error => {
-                console.error('Error while sending filter data:', error); // Tangani kesalahan
-            });
         });
     </script>
 
