@@ -68,92 +68,93 @@ def add_product():
 @product_routes.route('/productlist', methods=['GET'])
 @login_required
 def get_productlist():
-    filter_field = request.args.get('filter_field')
-    filter_operator = request.args.get('filter_operator')
-    filter_value = request.args.get('filter_value')
-    filter_value_start = request.args.get('filter_value_start')
-    filter_value_end = request.args.get('filter_value_end')
-
-    print(f"Filter Field: {filter_field}")
-    print(f"Filter Operator: {filter_operator}")
-    print(f"Filter Value: {filter_value}")
-    print(f"Filter Value Start: {filter_value_start}")
-    print(f"Filter Value End: {filter_value_end}")
+    # Get list of filter parameters
+    filter_field = request.args.getlist('filter_field[]')
+    filter_operator = request.args.getlist('filter_operator[]')
+    filter_value = request.args.getlist('filter_value[]')
+    filter_value_start = request.args.get('filter_value_start[]')
+    filter_value_end = request.args.get('filter_value_end[]')
 
     query = Product.query
 
-    if filter_field:
-        if filter_field in ['product_name', 'code', 'details']:
-            if filter_operator == 'is':
-                query = query.filter(getattr(Product, filter_field) == filter_value)
-            elif filter_operator == 'is_not':
-                query = query.filter(getattr(Product, filter_field) != filter_value)
-            elif filter_operator == 'contains':
-                query = query.filter(getattr(Product, filter_field).ilike(f'%{filter_value}%'))
-            elif filter_operator == 'does_not_contain':
-                query = query.filter(~getattr(Product, filter_field).ilike(f'%{filter_value}%'))
-            elif filter_operator == 'starts_with':
-                query = query.filter(getattr(Product, filter_field).ilike(f'{filter_value}%'))
-            elif filter_operator == 'ends_with':
-                query = query.filter(getattr(Product, filter_field).ilike(f'%{filter_value}'))
-            elif filter_operator == 'is_empty':
-                query = query.filter(getattr(Product, filter_field) == None)
-            elif filter_operator == 'is_not_empty':
-                query = query.filter(getattr(Product, filter_field) != None)
+    for i in range(len(filter_field)):
+        field = filter_field[i]
+        operator = filter_operator[i]
+        value = filter_value[i]
 
-        elif filter_field in ['category', 'storage']:
-            if filter_operator == 'is':
-                query = query.filter(getattr(Product, filter_field) == filter_value)
-            elif filter_operator == 'is_not':
-                query = query.filter(getattr(Product, filter_field) != filter_value)
-            elif filter_operator == 'is_empty':
-                query = query.filter(getattr(Product, filter_field) == None)
-            elif filter_operator == 'is_not_empty':
-                query = query.filter(getattr(Product, filter_field) != None)
+        print(f"Field: {field}, Operator: {operator}, Value: {value}")
 
-        elif filter_field == 'stock':
-            if filter_operator == '=':
-                query = query.filter(Product.stock == filter_value)
-            elif filter_operator == '!=':
-                query = query.filter(Product.stock != filter_value)
-            elif filter_operator == '>':
-                query = query.filter(Product.stock > filter_value)
-            elif filter_operator == '<':
-                query = query.filter(Product.stock < filter_value)
-            elif filter_operator == '>=':
-                query = query.filter(Product.stock >= filter_value)
-            elif filter_operator == '<=':
-                query = query.filter(Product.stock <= filter_value)
-            elif filter_operator == 'is_empty':
+        if field in ['product_name', 'code', 'details']:
+            if operator == 'is':
+                query = query.filter(getattr(Product, field) == value)
+            elif operator == 'is_not':
+                query = query.filter(getattr(Product, field) != value)
+            elif operator == 'contains':
+                query = query.filter(getattr(Product, field).ilike(f'%{value}%'))
+            elif operator == 'does_not_contain':
+                query = query.filter(~getattr(Product, field).ilike(f'%{value}%'))
+            elif operator == 'starts_with':
+                query = query.filter(getattr(Product, field).ilike(f'{value}%'))
+            elif operator == 'ends_with':
+                query = query.filter(getattr(Product, field).ilike(f'%{value}'))
+            elif operator == 'is_empty':
+                query = query.filter(getattr(Product, field) == None)
+            elif operator == 'is_not_empty':
+                query = query.filter(getattr(Product, field) != None)
+
+        elif field in ['category', 'storage']:
+            if operator == 'is':
+                query = query.filter(getattr(Product, field) == value)
+            elif operator == 'is_not':
+                query = query.filter(getattr(Product, field) != value)
+            elif operator == 'is_empty':
+                query = query.filter(getattr(Product, field) == None)
+            elif operator == 'is_not_empty':
+                query = query.filter(getattr(Product, field) != None)
+
+        elif field == 'stock':
+            if operator == '=':
+                query = query.filter(Product.stock == value)
+            elif operator == '!=':
+                query = query.filter(Product.stock != value)
+            elif operator == '>':
+                query = query.filter(Product.stock > value)
+            elif operator == '<':
+                query = query.filter(Product.stock < value)
+            elif operator == '>=':
+                query = query.filter(Product.stock >= value)
+            elif operator == '<=':
+                query = query.filter(Product.stock <= value)
+            elif operator == 'is_empty':
                 query = query.filter(Product.stock == None)
-            elif filter_operator == 'is_not_empty':
+            elif operator == 'is_not_empty':
                 query = query.filter(Product.stock != None)
 
-        elif filter_field == 'stock_status':
-            if filter_operator == 'is':
-                if filter_value == 'available':
+        elif field == 'stock_status':
+            if operator == 'is':
+                if value == 'available':
                     query = query.filter(Product.stock > 0)
                 else:
                     query = query.filter(Product.stock <= 0)
-            elif filter_operator == 'is_not':
-                if filter_value == 'available':
+            elif operator == 'is_not':
+                if value == 'available':
                     query = query.filter(Product.stock <= 0)
                 else:
                     query = query.filter(Product.stock > 0)
 
-        elif filter_field in ['created_at', 'updated_at']:
-            if filter_operator == 'is':
-                query = query.filter(getattr(Product, filter_field) == filter_value_start)
-            elif filter_operator == 'is_before':
-                query = query.filter(getattr(Product, filter_field) < filter_value_start)
-            elif filter_operator == 'is_after':
-                query = query.filter(getattr(Product, filter_field) > filter_value_start)
-            elif filter_operator == 'is_between':
-                query = query.filter(getattr(Product, filter_field).between(filter_value_start, filter_value_end))
-            elif filter_operator == 'is_empty':
-                query = query.filter(getattr(Product, filter_field) == None)
-            elif filter_operator == 'is_not_empty':
-                query = query.filter(getattr(Product, filter_field) != None)
+        elif field in ['created_at', 'updated_at']:
+            if operator == 'is':
+                query = query.filter(getattr(Product, field) == filter_value_start)
+            elif operator == 'is_before':
+                query = query.filter(getattr(Product, field) < filter_value_start)
+            elif operator == 'is_after':
+                query = query.filter(getattr(Product, field) > filter_value_start)
+            elif operator == 'is_between':
+                query = query.filter(getattr(Product, field).between(filter_value_start, filter_value_end))
+            elif operator == 'is_empty':
+                query = query.filter(getattr(Product, field) == None)
+            elif operator == 'is_not_empty':
+                query = query.filter(getattr(Product, field) != None)
 
     products = query.all()
 
