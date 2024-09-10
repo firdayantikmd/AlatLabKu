@@ -58,16 +58,17 @@
                 </div>
                 <div class="card">
                     <div class="card-body">
+                        <!-- filter icon -->
                         <a class="me-3" id="filter-icon">
-                            <img src="static/img/icons/filter1.svg" alt="img">
+                            <img src="static/img/icons/filter1.svg" alt="filter icon">
                         </a>
 
                         <div class="card mb-0" id="filter-inputs-section" style="display: none;">
                             <div class="card-body pb-0">
                                 <form method="GET" action="{{ url_for('product_routes.get_productlist') }}">
                                     <div class="row">
-                                        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-                                            <select id="filter-field" class="form-control">
+                                        <div class="col-md-2 col-sm-12 mb-3">
+                                            <select id="filter-field" name="filter_field" class="form-control">
                                                 <option value="">Pilih Filter</option>
                                                 <option value="product_name">Nama Produk</option>
                                                 <option value="category">Kategori</option>
@@ -80,19 +81,27 @@
                                                 <option value="updated_at">Diperbaharui Pada</option>
                                             </select>
                                         </div>
-
-                                        <div id="filter-inputs" class="col-lg-6 col-md-6 col-sm-12 mb-3"></div>
+                                
+                                        <div class="col-md-2 col-sm-12 mb-3">
+                                            <select id="filter-operator" name="filter_operator" class="form-control">
+                                                <!-- operator dinamically by field -->
+                                            </select>
+                                        </div>
+                                
+                                        <div id="filter-inputs" class="col-md-2 col-sm-12 mb-3">
+                                            <!-- dinamically filter input -->
+                                        </div>
                                     </div>
-                                    
+                                
                                     <div class="row">
-                                        <div class="col-lg-3 col-md-12 col-sm-12 mb-3">
+                                        <div class="col-md-2 col-sm-12 mb-3">
                                             <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
                                         </div>
-                                        <div class="col-lg-3 col-md-12 col-sm-12 mb-3">
+                                        <div class="col-md-2 col-sm-12 mb-3">
                                             <button type="button" id="clear-filter" class="btn btn-secondary w-100">Clear Filter</button>
                                         </div>
                                     </div>
-                                </form>
+                                </form>                                                              
                             </div>
                         </div>                    
                         
@@ -215,52 +224,89 @@
         document.getElementById('filter-field').addEventListener('change', function() {
             const selectedField = this.value;
             const filterInputs = document.getElementById('filter-inputs');
-            filterInputs.innerHTML = '';
+            const filterOperator = document.getElementById('filter-operator');
 
-            if (selectedField === 'product_name') {
-                filterInputs.innerHTML = `
-                    <input type="text" name="product_name" class="form-control" placeholder="Nama Produk">
+            filterInputs.innerHTML = '';
+            filterOperator.innerHTML = '';
+
+            if (['product_name', 'code', 'details'].includes(selectedField)) {
+                filterOperator.innerHTML = `
+                    <option value="is">Is</option>
+                    <option value="is_not">Is Not</option>
+                    <option value="contains">Contains</option>
+                    <option value="does_not_contain">Does Not Contain</option>
+                    <option value="starts_with">Starts With</option>
+                    <option value="ends_with">Ends With</option>
+                    <option value="is_empty">Is Empty</option>
+                    <option value="is_not_empty">Is Not Empty</option>
                 `;
-            } else if (selectedField === 'category') {
                 filterInputs.innerHTML = `
-                    <input type="text" name="category" class="form-control" placeholder="Kategori">
+                    <input type="text" name="filter_value" class="form-control" placeholder="Enter value">
                 `;
-            } else if (selectedField === 'code') {
-                filterInputs.innerHTML = `
-                    <input type="text" name="code" class="form-control" placeholder="Kode Produk">
+            } else if (selectedField === 'category' || selectedField === 'storage') {
+                filterOperator.innerHTML = `
+                    <option value="is">Is</option>
+                    <option value="is_not">Is Not</option>
+                    <option value="is_empty">Is Empty</option>
+                    <option value="is_not_empty">Is Not Empty</option>
                 `;
-            } else if (selectedField === 'storage') {
                 filterInputs.innerHTML = `
-                    <input type="text" name="storage" class="form-control" placeholder="Tempat Barang">
+                    <input type="text" name="filter_value" class="form-control" placeholder="Enter value">
                 `;
             } else if (selectedField === 'stock') {
+                filterOperator.innerHTML = `
+                    <option value="=">=</option>
+                    <option value="!=">!=</option>
+                    <option value=">">></option>
+                    <option value="<"><</option>
+                    <option value=">=">>=</option>
+                    <option value="<="><=</option>
+                    <option value="is_empty">Is Empty</option>
+                    <option value="is_not_empty">Is Not Empty</option>
+                `;
                 filterInputs.innerHTML = `
-                    <input type="number" name="stock" class="form-control" placeholder="Stock">
+                    <input type="number" name="filter_value" class="form-control" placeholder="Enter value">
                 `;
             } else if (selectedField === 'stock_status') {
+                filterOperator.innerHTML = `
+                    <option value="is">Is</option>
+                    <option value="is_not">Is Not</option>
+                `;
                 filterInputs.innerHTML = `
-                    <select name="stock_status" class="form-control">
-                        <option value="">Status Stok</option>
+                    <select name="filter_value" class="form-control">
                         <option value="available">Tersedia</option>
                         <option value="unavailable">Tidak Tersedia</option>
                     </select>
                 `;
-            } else if (selectedField === 'details') {
-                filterInputs.innerHTML = `
-                    <input type="text" name="details" class="form-control" placeholder="Detail">
-                `;
             } else if (selectedField === 'created_at' || selectedField === 'updated_at') {
+                filterOperator.innerHTML = `
+                    <option value="is">Is</option>
+                    <option value="is_before">Is Before</option>
+                    <option value="is_after">Is After</option>
+                    <option value="is_between">Is Between</option>
+                    <option value="is_empty">Is Empty</option>
+                    <option value="is_not_empty">Is Not Empty</option>
+                `;
                 filterInputs.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-6">
-                            <input type="date" name="${selectedField}_start" class="form-control" placeholder="Mulai Tanggal">
-                        </div>
-                        <div class="col-md-6">
-                            <input type="date" name="${selectedField}_end" class="form-control" placeholder="Sampai Tanggal">
-                        </div>
-                    </div>
+                    <input type="date" name="filter_value_start" class="form-control mb-2" placeholder="Start Date">
+                    <input type="date" name="filter_value_end" class="form-control" placeholder="End Date" style="display:none;">
                 `;
             }
+
+            filterOperator.addEventListener('change', function() {
+                if (this.value === 'is_between') {
+                    document.querySelector('input[name="filter_value_end"]').style.display = 'block';
+                } else {
+                    document.querySelector('input[name="filter_value_end"]').style.display = 'none';
+                }
+            });
+
+            filterOperator.addEventListener('change', function() {
+                console.log('Selected Field:', selectedField);
+                console.log('Selected Operator:', filterOperator.value);
+                const filterValue = document.querySelector('input[name="filter_value"]')?.value || 'N/A';
+                console.log('Filter Value:', filterValue); 
+            });
         });
 
         document.getElementById('clear-filter').addEventListener('click', function() {

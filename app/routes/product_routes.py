@@ -68,45 +68,93 @@ def add_product():
 @product_routes.route('/productlist', methods=['GET'])
 @login_required
 def get_productlist():
-    product_name = request.args.get('product_name', '')
-    category = request.args.get('category', '')
-    code = request.args.get('code', '')
-    storage = request.args.get('storage', '')
-    stock = request.args.get('stock', '')
-    stock_status = request.args.get('stock_status', '')
-    details = request.args.get('details', '')
+    filter_field = request.args.get('filter_field')
+    filter_operator = request.args.get('filter_operator')
+    filter_value = request.args.get('filter_value')
+    filter_value_start = request.args.get('filter_value_start')
+    filter_value_end = request.args.get('filter_value_end')
+
+    print(f"Filter Field: {filter_field}")
+    print(f"Filter Operator: {filter_operator}")
+    print(f"Filter Value: {filter_value}")
+    print(f"Filter Value Start: {filter_value_start}")
+    print(f"Filter Value End: {filter_value_end}")
 
     query = Product.query
 
-    if product_name:
-        query = query.filter(Product.product_name.ilike(f'%{product_name}%'))
+    if filter_field:
+        if filter_field in ['product_name', 'code', 'details']:
+            if filter_operator == 'is':
+                query = query.filter(getattr(Product, filter_field) == filter_value)
+            elif filter_operator == 'is_not':
+                query = query.filter(getattr(Product, filter_field) != filter_value)
+            elif filter_operator == 'contains':
+                query = query.filter(getattr(Product, filter_field).ilike(f'%{filter_value}%'))
+            elif filter_operator == 'does_not_contain':
+                query = query.filter(~getattr(Product, filter_field).ilike(f'%{filter_value}%'))
+            elif filter_operator == 'starts_with':
+                query = query.filter(getattr(Product, filter_field).ilike(f'{filter_value}%'))
+            elif filter_operator == 'ends_with':
+                query = query.filter(getattr(Product, filter_field).ilike(f'%{filter_value}'))
+            elif filter_operator == 'is_empty':
+                query = query.filter(getattr(Product, filter_field) == None)
+            elif filter_operator == 'is_not_empty':
+                query = query.filter(getattr(Product, filter_field) != None)
 
-    if category:
-        query = query.filter(cast(Product.category, String).ilike(f'%{category}%'))
+        elif filter_field in ['category', 'storage']:
+            if filter_operator == 'is':
+                query = query.filter(getattr(Product, filter_field) == filter_value)
+            elif filter_operator == 'is_not':
+                query = query.filter(getattr(Product, filter_field) != filter_value)
+            elif filter_operator == 'is_empty':
+                query = query.filter(getattr(Product, filter_field) == None)
+            elif filter_operator == 'is_not_empty':
+                query = query.filter(getattr(Product, filter_field) != None)
 
-    if code:
-        query = query.filter(Product.code.ilike(f'%{code}%'))
+        elif filter_field == 'stock':
+            if filter_operator == '=':
+                query = query.filter(Product.stock == filter_value)
+            elif filter_operator == '!=':
+                query = query.filter(Product.stock != filter_value)
+            elif filter_operator == '>':
+                query = query.filter(Product.stock > filter_value)
+            elif filter_operator == '<':
+                query = query.filter(Product.stock < filter_value)
+            elif filter_operator == '>=':
+                query = query.filter(Product.stock >= filter_value)
+            elif filter_operator == '<=':
+                query = query.filter(Product.stock <= filter_value)
+            elif filter_operator == 'is_empty':
+                query = query.filter(Product.stock == None)
+            elif filter_operator == 'is_not_empty':
+                query = query.filter(Product.stock != None)
 
-    if storage:
-        query = query.filter(Product.storage.ilike(f'%{storage}%'))
+        elif filter_field == 'stock_status':
+            if filter_operator == 'is':
+                if filter_value == 'available':
+                    query = query.filter(Product.stock > 0)
+                else:
+                    query = query.filter(Product.stock <= 0)
+            elif filter_operator == 'is_not':
+                if filter_value == 'available':
+                    query = query.filter(Product.stock <= 0)
+                else:
+                    query = query.filter(Product.stock > 0)
 
-    if stock:
-        try:
-            stock_value = int(stock)
-            query = query.filter(Product.stock == stock_value)
-        except ValueError:
-            pass
+        elif filter_field in ['created_at', 'updated_at']:
+            if filter_operator == 'is':
+                query = query.filter(getattr(Product, filter_field) == filter_value_start)
+            elif filter_operator == 'is_before':
+                query = query.filter(getattr(Product, filter_field) < filter_value_start)
+            elif filter_operator == 'is_after':
+                query = query.filter(getattr(Product, filter_field) > filter_value_start)
+            elif filter_operator == 'is_between':
+                query = query.filter(getattr(Product, filter_field).between(filter_value_start, filter_value_end))
+            elif filter_operator == 'is_empty':
+                query = query.filter(getattr(Product, filter_field) == None)
+            elif filter_operator == 'is_not_empty':
+                query = query.filter(getattr(Product, filter_field) != None)
 
-    if stock_status:
-        if stock_status == 'available':
-            query = query.filter(Product.stock > 0)
-        elif stock_status == 'unavailable':
-            query = query.filter(Product.stock <= 0)
-
-    if details:
-        query = query.filter(Product.details.ilike(f'%{details}%'))
-
-    # jalankan query dan ambil hasil
     products = query.all()
 
     return render_template('productlist.html', products=products)
