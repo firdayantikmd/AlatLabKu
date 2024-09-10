@@ -73,8 +73,11 @@
                                                 <option value="category">Kategori</option>
                                                 <option value="code">Kode Produk</option>
                                                 <option value="storage">Tempat Barang</option>
+                                                <option value="stock">Stock</option>
                                                 <option value="stock_status">Status Stok</option>
                                                 <option value="details">Detail</option>
+                                                <option value="created_at">Ditambahkan Pada</option>
+                                                <option value="updated_at">Diperbaharui Pada</option>
                                             </select>
                                         </div>
 
@@ -230,6 +233,10 @@
                 filterInputs.innerHTML = `
                     <input type="text" name="storage" class="form-control" placeholder="Tempat Barang">
                 `;
+            } else if (selectedField === 'stock') {
+                filterInputs.innerHTML = `
+                    <input type="number" name="stock" class="form-control" placeholder="Stock">
+                `;
             } else if (selectedField === 'stock_status') {
                 filterInputs.innerHTML = `
                     <select name="stock_status" class="form-control">
@@ -241,6 +248,17 @@
             } else if (selectedField === 'details') {
                 filterInputs.innerHTML = `
                     <input type="text" name="details" class="form-control" placeholder="Detail">
+                `;
+            } else if (selectedField === 'created_at' || selectedField === 'updated_at') {
+                filterInputs.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="date" name="${selectedField}_start" class="form-control" placeholder="Mulai Tanggal">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="date" name="${selectedField}_end" class="form-control" placeholder="Sampai Tanggal">
+                        </div>
+                    </div>
                 `;
             }
         });

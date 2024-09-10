@@ -72,6 +72,7 @@ def get_productlist():
     category = request.args.get('category', '')
     code = request.args.get('code', '')
     storage = request.args.get('storage', '')
+    stock = request.args.get('stock', '')
     stock_status = request.args.get('stock_status', '')
     details = request.args.get('details', '')
 
@@ -88,6 +89,13 @@ def get_productlist():
 
     if storage:
         query = query.filter(Product.storage.ilike(f'%{storage}%'))
+
+    if stock:
+        try:
+            stock_value = int(stock)
+            query = query.filter(Product.stock == stock_value)
+        except ValueError:
+            pass
 
     if stock_status:
         if stock_status == 'available':
