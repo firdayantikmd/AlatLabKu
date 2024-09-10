@@ -71,7 +71,10 @@
                                                 <option value="">Pilih Filter</option>
                                                 <option value="product_name">Nama Produk</option>
                                                 <option value="category">Kategori</option>
+                                                <option value="code">Kode Produk</option>
+                                                <option value="storage">Tempat Barang</option>
                                                 <option value="stock_status">Status Stok</option>
+                                                <option value="details">Detail</option>
                                             </select>
                                         </div>
 
@@ -213,23 +216,32 @@
 
             if (selectedField === 'product_name') {
                 filterInputs.innerHTML = `
-                    <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-                        <input type="text" name="product_name" class="form-control" placeholder="Nama Produk">
-                    </div>`;
+                    <input type="text" name="product_name" class="form-control" placeholder="Nama Produk">
+                `;
             } else if (selectedField === 'category') {
                 filterInputs.innerHTML = `
-                    <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-                        <input type="text" name="category" class="form-control" placeholder="Kategori">
-                    </div>`;
+                    <input type="text" name="category" class="form-control" placeholder="Kategori">
+                `;
+            } else if (selectedField === 'code') {
+                filterInputs.innerHTML = `
+                    <input type="text" name="code" class="form-control" placeholder="Kode Produk">
+                `;
+            } else if (selectedField === 'storage') {
+                filterInputs.innerHTML = `
+                    <input type="text" name="storage" class="form-control" placeholder="Tempat Barang">
+                `;
             } else if (selectedField === 'stock_status') {
                 filterInputs.innerHTML = `
-                    <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
-                        <select name="stock_status" class="form-control">
-                            <option value="">Status Stok</option>
-                            <option value="available">Tersedia</option>
-                            <option value="unavailable">Tidak Tersedia</option>
-                        </select>
-                    </div>`;
+                    <select name="stock_status" class="form-control">
+                        <option value="">Status Stok</option>
+                        <option value="available">Tersedia</option>
+                        <option value="unavailable">Tidak Tersedia</option>
+                    </select>
+                `;
+            } else if (selectedField === 'details') {
+                filterInputs.innerHTML = `
+                    <input type="text" name="details" class="form-control" placeholder="Detail">
+                `;
             }
         });
 

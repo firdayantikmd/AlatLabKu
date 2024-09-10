@@ -70,7 +70,10 @@ def add_product():
 def get_productlist():
     product_name = request.args.get('product_name', '')
     category = request.args.get('category', '')
+    code = request.args.get('code', '')
+    storage = request.args.get('storage', '')
     stock_status = request.args.get('stock_status', '')
+    details = request.args.get('details', '')
 
     query = Product.query
 
@@ -80,11 +83,20 @@ def get_productlist():
     if category:
         query = query.filter(cast(Product.category, String).ilike(f'%{category}%'))
 
+    if code:
+        query = query.filter(Product.code.ilike(f'%{code}%'))
+
+    if storage:
+        query = query.filter(Product.storage.ilike(f'%{storage}%'))
+
     if stock_status:
         if stock_status == 'available':
             query = query.filter(Product.stock > 0)
         elif stock_status == 'unavailable':
             query = query.filter(Product.stock <= 0)
+
+    if details:
+        query = query.filter(Product.details.ilike(f'%{details}%'))
 
     # jalankan query dan ambil hasil
     products = query.all()
