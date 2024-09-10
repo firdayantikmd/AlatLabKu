@@ -84,21 +84,26 @@ def get_productlist():
         operator = filter_operator[i]
 
         if field in ['created_at', 'updated_at']:
-            start_value = filter_value_start[i]
-            end_value = filter_value_end[i] if len(filter_value_end) > i else None
-            
-            if operator == 'is':
-                condition = getattr(Product, field) == start_value
-            elif operator == 'is_before':
-                condition = getattr(Product, field) < start_value
-            elif operator == 'is_after':
-                condition = getattr(Product, field) > start_value
-            elif operator == 'is_between' and end_value:
-                condition = getattr(Product, field).between(start_value, end_value)
+            start_value = filter_value_start[i] if len(filter_value_start) > i and filter_value_start[i] else None
+            end_value = filter_value_end[i] if len(filter_value_end) > i and filter_value_end[i] else None
+
+            if operator == 'is' and start_value:
+                condition = func.date(getattr(Product, field)) == start_value
+            elif operator == 'is_before' and start_value:
+                condition = func.date(getattr(Product, field)) < start_value
+            elif operator == 'is_after' and start_value:
+                condition = func.date(getattr(Product, field)) > start_value
+            elif operator == 'is_between' and start_value and end_value:
+                if start_value > end_value:
+                    flash("Start date cannot be later than end date.", "error")
+                    return redirect(request.url)
+                condition = func.date(getattr(Product, field)).between(start_value, end_value)
             elif operator == 'is_empty':
                 condition = getattr(Product, field) == None
             elif operator == 'is_not_empty':
                 condition = getattr(Product, field) != None
+            else:
+                continue
         
         else:
             value = filter_value[i]

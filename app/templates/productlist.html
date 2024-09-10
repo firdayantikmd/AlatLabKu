@@ -340,22 +340,18 @@
                             <input type="date" name="filter_value_start[]" class="form-control mb-2" placeholder="Start Date">
                             <input type="date" name="filter_value_end[]" class="form-control" placeholder="End Date" style="display:none;">
                         `;
+
+                        filterOperator.addEventListener('change', function() {
+                            const endDateInput = filterInputs.querySelector('input[name="filter_value_end[]"]');
+                            if (this.value === 'is_between') {
+                                endDateInput.style.display = 'block';
+                            } else {
+                                endDateInput.style.display = 'none';
+                            }
+                        });
                         break;
                 }
-
-                // Handle 'is_between' for date ranges
-                filterOperator.addEventListener('change', function() {
-                    const endDateInput = filterInputs.querySelector('input[name="filter_value_end[]"]');
-                    if (endDateInput) {
-                        if (this.value === 'is_between') {
-                            endDateInput.style.display = 'block';
-                        } else {
-                            endDateInput.style.display = 'none';
-                        }
-                    }
-                });
             }
-
             document.getElementById('clear-filter').addEventListener('click', function() {
                 window.location.href = '{{ url_for('product_routes.get_productlist') }}';
             });
