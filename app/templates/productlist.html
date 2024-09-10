@@ -209,12 +209,16 @@
             let filterCount = 0;
 
             document.getElementById('add-filter-rule').addEventListener('click', function () {
+                addFilterRule();
+            });
+
+            function addFilterRule(logic = true) {
                 filterCount++;
                 const filterRulesContainer = document.getElementById('filter-rules-container');
 
                 // If it's not the first filter, add the AND/OR dropdown
                 let logicDropdown = '';
-                if (filterCount > 1) {
+                if (filterCount > 1 && logic) {
                     logicDropdown = `
                         <div class="col-md-2 col-sm-12 mb-3">
                             <select id="filter-logic-${filterCount}" name="filter_logic[]" class="form-control">
@@ -265,14 +269,12 @@
                     </div>
                 `;
 
-                // Append the new filter rule to the container
                 filterRulesContainer.appendChild(newFilterRule);
 
-                // Attach change event to populate the operators for the new field
                 document.getElementById(`filter-field-${filterCount}`).addEventListener('change', function () {
                     populateOperators(filterCount);
                 });
-            });
+            };
 
             // Function to populate operators based on the selected field
             function populateOperators(filterId) {
@@ -367,17 +369,23 @@
         function duplicateFilter(filterCount) {
             const originalFilter = document.querySelector(`#filter-field-${filterCount}`).closest('.filter-rule');
             const newFilter = originalFilter.cloneNode(true);
-            
+
             filterCount++;
-            
+
+            // Reset values in the cloned filter
             newFilter.querySelector(`#filter-field-${filterCount-1}`).id = `filter-field-${filterCount}`;
+            newFilter.querySelector(`#filter-field-${filterCount}`).value = '';
             newFilter.querySelector(`#filter-operator-${filterCount-1}`).id = `filter-operator-${filterCount}`;
+            newFilter.querySelector(`#filter-operator-${filterCount}`).innerHTML = '';
             newFilter.querySelector(`#filter-input-${filterCount-1}`).id = `filter-input-${filterCount}`;
+            newFilter.querySelector(`#filter-input-${filterCount}`).innerHTML = '<input type="text" name="filter_value[]" class="form-control" placeholder="Enter value">';
             newFilter.querySelector(`#dropdownMenuButton-${filterCount-1}`).id = `dropdownMenuButton-${filterCount}`;
-            
+
+            // Append the new filter
             document.getElementById('filter-rules-container').appendChild(newFilter);
-            
-            document.getElementById(`filter-field-${filterCount}`).addEventListener('change', function() {
+
+            // Attach event listeners to the new filter
+            document.getElementById(`filter-field-${filterCount}`).addEventListener('change', function () {
                 populateOperators(filterCount);
             });
         }
