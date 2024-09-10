@@ -28,9 +28,9 @@
 </head>
 
 <body>
-    <div id="global-loader">
+    <!-- <div id="global-loader">
         <div class="whirly-loader"> </div>
-    </div>
+    </div> -->
 
     <div class="main-wrapper">
         {% include 'navbar.html' %}
@@ -62,37 +62,33 @@
                             <img src="static/img/icons/filter1.svg" alt="img">
                         </a>
 
-                        <!-- filter form hidden -->
-                        <div class="card mb-0" id="filter_inputs" style="display: none;">
+                        <div class="card mb-0" id="filter-inputs-section" style="display: none;">
                             <div class="card-body pb-0">
                                 <form method="GET" action="{{ url_for('product_routes.get_productlist') }}">
                                     <div class="row">
-                                        <div class="col-lg-2 col-md-6 col-sm-12 mb-3">
-                                            <div class="form-group">
-                                                <input type="text" class="form-control" name="product_name" placeholder="Product Name">
-                                            </div>
+                                        <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+                                            <select id="filter-field" class="form-control">
+                                                <option value="">Pilih Filter</option>
+                                                <option value="product_name">Nama Produk</option>
+                                                <option value="category">Kategori</option>
+                                                <option value="stock_status">Status Stok</option>
+                                            </select>
                                         </div>
-                                        <div class="col-lg-2 col-md-6 col-sm-12 mb-3">
-                                            <div class="form-group">
-                                                <input type="text" class="form-control" name="category" placeholder="Category">
-                                            </div>
+
+                                        <div id="filter-inputs" class="col-lg-6 col-md-6 col-sm-12 mb-3"></div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-lg-3 col-md-12 col-sm-12 mb-3">
+                                            <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
                                         </div>
-                                        <div class="col-lg-2 col-md-6 col-sm-12 mb-3">
-                                            <div class="form-group">
-                                                <select class="form-control" name="stock_status">
-                                                    <option value="">Stock Status</option>
-                                                    <option value="available">Tersedia</option>
-                                                    <option value="unavailable">Tidak Tersedia</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-2 col-md-6 col-sm-12 mb-3">
-                                            <button type="submit" class="btn btn-primary w-100">Filter</button>
+                                        <div class="col-lg-3 col-md-12 col-sm-12 mb-3">
+                                            <button type="button" id="clear-filter" class="btn btn-secondary w-100">Clear Filter</button>
                                         </div>
                                     </div>
                                 </form>
                             </div>
-                        </div>
+                        </div>                    
                         
                         <div class="card mb-0" id="filter_inputs">
                             <div class="card-body pb-0">
@@ -206,12 +202,41 @@
         }
 
         document.getElementById('filter-icon').addEventListener('click', function() {
-            var filterInputs = document.getElementById('filter_inputs');
-            if (filterInputs.style.display === "none") {
-                filterInputs.style.display = "block";
-            } else {
-                filterInputs.style.display = "none";
+            var filterSection = document.getElementById('filter-inputs-section');
+            filterSection.style.display = filterSection.style.display === "none" ? "block" : "none";
+        });
+
+        document.getElementById('filter-field').addEventListener('change', function() {
+            const selectedField = this.value;
+            const filterInputs = document.getElementById('filter-inputs');
+            filterInputs.innerHTML = '';
+
+            if (selectedField === 'product_name') {
+                filterInputs.innerHTML = `
+                    <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+                        <input type="text" name="product_name" class="form-control" placeholder="Nama Produk">
+                    </div>`;
+            } else if (selectedField === 'category') {
+                filterInputs.innerHTML = `
+                    <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+                        <input type="text" name="category" class="form-control" placeholder="Kategori">
+                    </div>`;
+            } else if (selectedField === 'stock_status') {
+                filterInputs.innerHTML = `
+                    <div class="col-lg-3 col-md-6 col-sm-12 mb-3">
+                        <select name="stock_status" class="form-control">
+                            <option value="">Status Stok</option>
+                            <option value="available">Tersedia</option>
+                            <option value="unavailable">Tidak Tersedia</option>
+                        </select>
+                    </div>`;
             }
+        });
+
+        document.getElementById('clear-filter').addEventListener('click', function() {
+            document.getElementById('filter-field').value = '';
+            document.getElementById('filter-inputs').innerHTML = '';
+            window.location.href = '{{ url_for('product_routes.get_productlist') }}';
         });
     </script>
 

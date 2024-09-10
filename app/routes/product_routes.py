@@ -72,18 +72,14 @@ def get_productlist():
     category = request.args.get('category', '')
     stock_status = request.args.get('stock_status', '')
 
-    # mulai query dari table product
     query = Product.query
 
-    # filter untuk nama produk jika ada input
     if product_name:
         query = query.filter(Product.product_name.ilike(f'%{product_name}%'))
-    
-    # filter untuk kategori jika ada input
+
     if category:
         query = query.filter(cast(Product.category, String).ilike(f'%{category}%'))
 
-    # filter untuk stok jika ada input
     if stock_status:
         if stock_status == 'available':
             query = query.filter(Product.stock > 0)
