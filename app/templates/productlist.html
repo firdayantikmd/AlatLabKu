@@ -79,7 +79,7 @@
                                     <!-- add filter rule -->
                                     <div class="row">
                                         <div class="col-md-2 col-sm-12 mb-3">
-                                            <button type="button" id="add-filter-rule" class="btn btn-success w-100">Add Filter Rule</button>
+                                            <button type="button" id="add-filter-rule" class="btn btn-secondary w-100">Add Filter Rule</button>
                                         </div>
                                         <div class="col-md-2 col-sm-12 mb-3">
                                             <button type="submit" class="btn btn-primary w-100">Apply Filter</button>
@@ -238,6 +238,17 @@
                     <div class="col-md-2 col-sm-12 mb-3" id="filter-input-${filterCount}">
                         <input type="text" name="filter_value[]" class="form-control" placeholder="Enter value">
                     </div>
+                    <div class="col-md-2 col-sm-12 mb-3">
+                        <div class="dropdown">
+                            <button class="btn btn-light" type="button" id="dropdownMenuButton-${filterCount}" data-bs-toggle="dropdown" aria-expanded="false">
+                                &bull;&bull;&bull;
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${filterCount}">
+                                <li><a class="dropdown-item remove-group" href="#" onclick="deleteFilter(${filterCount})">Remove</a></li>
+                                <li><a class="dropdown-item duplicate-group" href="#" onclick="duplicateFilter(${filterCount})">Duplicate</a></li>
+                            </ul>
+                        </div>
+                    </div>
                 `;
 
                 // Append the new filter rule to the container
@@ -335,6 +346,29 @@
                 window.location.href = '{{ url_for('product_routes.get_productlist') }}';
             });
         });
+
+        function duplicateFilter(filterCount) {
+            const originalFilter = document.querySelector(`#filter-field-${filterCount}`).closest('.filter-rule');
+            const newFilter = originalFilter.cloneNode(true);
+            
+            filterCount++;
+            
+            newFilter.querySelector(`#filter-field-${filterCount-1}`).id = `filter-field-${filterCount}`;
+            newFilter.querySelector(`#filter-operator-${filterCount-1}`).id = `filter-operator-${filterCount}`;
+            newFilter.querySelector(`#filter-input-${filterCount-1}`).id = `filter-input-${filterCount}`;
+            newFilter.querySelector(`#dropdownMenuButton-${filterCount-1}`).id = `dropdownMenuButton-${filterCount}`;
+            
+            document.getElementById('filter-rules-container').appendChild(newFilter);
+            
+            document.getElementById(`filter-field-${filterCount}`).addEventListener('change', function() {
+                populateOperators(filterCount);
+            });
+        }
+
+        function deleteFilter(filterCount) {
+            const filterRule = document.querySelector(`#filter-field-${filterCount}`).closest('.filter-rule');
+            filterRule.remove();
+        }
     </script>
 
 </body>
