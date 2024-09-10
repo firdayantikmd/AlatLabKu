@@ -75,17 +75,13 @@ def get_productlist():
     filter_value_start = request.args.getlist('filter_value_start[]')
     filter_value_end = request.args.getlist('filter_value_end[]')
 
-    # start with the base query
     query = Product.query
 
-    # hold individual filter conditions
     conditions = []
 
     for i in range(len(filter_field)):
         field = filter_field[i]
         operator = filter_operator[i]
-
-        print(f"Field: {field}, Operator: {operator}")
 
         if field in ['created_at', 'updated_at']:
             start_value = filter_value_start[i]
@@ -106,8 +102,7 @@ def get_productlist():
         
         else:
             value = filter_value[i]
-            print(f"Field: {field}, Operator: {operator}, Value: {value}")
-            # Handle non-date filters
+
             if field in ['product_name', 'code', 'details']:
                 if operator == 'is':
                     condition = getattr(Product, field) == value

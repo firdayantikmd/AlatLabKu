@@ -216,7 +216,7 @@
                 filterCount++;
                 const filterRulesContainer = document.getElementById('filter-rules-container');
 
-                // If it's not the first filter, add the AND/OR dropdown
+                // Jika filter lebih dari 1, tambahkan dropdown AND/OR
                 let logicDropdown = '';
                 if (filterCount > 1 && logic) {
                     logicDropdown = `
@@ -229,7 +229,7 @@
                     `;
                 }
 
-                // create a new filter rule row
+                // Tambahkan baris filter baru
                 const newFilterRule = document.createElement('div');
                 newFilterRule.classList.add('row', 'filter-rule', 'mt-2');
                 newFilterRule.innerHTML = `
@@ -249,7 +249,7 @@
                     </div>
                     <div class="col-md-2 col-sm-12 mb-3">
                         <select id="filter-operator-${filterCount}" name="filter_operator[]" class="form-control">
-                            <!-- Operator options will be dynamically populated -->
+                            <!-- Operator akan diisi secara dinamis berdasarkan pilihan field -->
                         </select>
                     </div>
                     <div class="col-md-2 col-sm-12 mb-3" id="filter-input-${filterCount}">
@@ -270,10 +270,11 @@
 
                 filterRulesContainer.appendChild(newFilterRule);
 
+                // Attach event listener for field change
                 document.getElementById(`filter-field-${filterCount}`).addEventListener('change', function () {
                     populateOperators(filterCount);
                 });
-            };
+            }
 
             // Function to populate operators based on the selected field
             function populateOperators(filterId) {
