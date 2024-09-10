@@ -206,16 +206,30 @@
         });
 
         document.addEventListener('DOMContentLoaded', function () {
-            let filterCount = 1;
+            let filterCount = 0;
 
             document.getElementById('add-filter-rule').addEventListener('click', function () {
                 filterCount++;
                 const filterRulesContainer = document.getElementById('filter-rules-container');
 
-                // Create a new filter rule row
+                // If it's not the first filter, add the AND/OR dropdown
+                let logicDropdown = '';
+                if (filterCount > 1) {
+                    logicDropdown = `
+                        <div class="col-md-2 col-sm-12 mb-3">
+                            <select id="filter-logic-${filterCount}" name="filter_logic[]" class="form-control">
+                                <option value="and">AND</option>
+                                <option value="or">OR</option>
+                            </select>
+                        </div>
+                    `;
+                }
+
+                // create a new filter rule row
                 const newFilterRule = document.createElement('div');
                 newFilterRule.classList.add('row', 'filter-rule', 'mt-2');
                 newFilterRule.innerHTML = `
+                    ${logicDropdown}
                     <div class="col-md-2 col-sm-12 mb-3">
                         <select id="filter-field-${filterCount}" name="filter_field[]" class="form-control">
                             <option value="">Pilih Filter</option>
@@ -334,10 +348,13 @@
                 }
 
                 filterOperator.addEventListener('change', function() {
-                    if (this.value === 'is_between') {
-                        document.querySelector('input[name="filter_value_end[]"]').style.display = 'block';
-                    } else {
-                        document.querySelector('input[name="filter_value_end[]"]').style.display = 'none';
+                    const endDateInput = document.querySelector('input[name="filter_value_end[]"]');
+                    if (endDateInput) { // Check if endDateInput exists
+                        if (this.value === 'is_between') {
+                            endDateInput.style.display = 'block';
+                        } else {
+                            endDateInput.style.display = 'none';
+                        }
                     }
                 });
             }
