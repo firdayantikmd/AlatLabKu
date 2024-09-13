@@ -243,7 +243,16 @@
 
         function addFilterRule(logic = true) {
             filterCount++;
+
             const filterRulesContainer = document.getElementById('filter-rules-container');
+            const existingFields = document.querySelectorAll('select[name="filter_field[]"]');
+
+            existingFields.forEach(field => {
+                if (field.value === `filter-field-${filterCount}`) {
+                    alert('Filter field already exists');
+                    return;
+                }
+            });
 
             // Jika filter lebih dari 1, tambahkan dropdown AND/OR
             let logicDropdown = '';
@@ -496,10 +505,28 @@
             const operators = document.querySelectorAll('select[name="filter_operator[]"]');
             const values = document.querySelectorAll('input[name="filter_value[]"], select[name="filter_value[]"]');
             
+            let fieldMap = {};
+
             for (let i = 0; i < fields.length; i++) {
-                if (!fields[i].value || !operators[i].value || !values[i].value) {
+                const field = fields[i].value;
+                const operator = operators[i].value;
+                const value = values[i].value;
+
+                if (!field || !operator || !value) {
                     alert("Please complete all filter fields.");
                     return false;
+                }
+
+                // Check for conflicting filters
+                if (!fieldMap[field]) {
+                    fieldMap[field] = { operator, value };
+                } else {
+                    // Add logic here to detect conflicting operators
+                    if (fieldMap[field].operator !== operator && 
+                        fieldMap[field].operator.includes('<=') && operator.includes('>=')) {
+                        alert(`Conflicting filter found for ${field}. Please resolve the conflict.`);
+                        return false;
+                    }
                 }
             }
             return true;
@@ -519,6 +546,33 @@
             document.getElementById('add-filter-group').addEventListener('click', function () {
                 addFilterGroup();
             });
+        });
+
+        function saveFilterSettings() {
+            const filters = document.querySelectorAll('.filter-rule');
+            let filterSettings = [];
+            filters.forEach(filter => {
+                let field = filter.querySelector('select[name="filter_field[]"]').value;
+                let operator = filter.querySelector('select[name="filter_operator[]"]').value;
+                let value = filter.querySelector('input[name="filter_value[]"]').value;
+                filterSettings.push({ field, operator, value });
+            });
+            localStorage.setItem('filterSettings', JSON.stringify(filterSettings));
+        }
+
+        // Load filter settings from localStorage
+        function loadFilterSettings() {
+            const filterSettings = JSON.parse(localStorage.getItem('filterSettings'));
+            if (filterSettings) {
+                filterSettings.forEach(filter => {
+                    addFilterRule();
+                    // Apply saved values
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadFilterSettings();
         });
     })();
     </script>

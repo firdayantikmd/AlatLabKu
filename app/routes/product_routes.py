@@ -95,7 +95,7 @@ def get_productlist():
             elif operator == 'is_between' and start_value and end_value:
                 if start_value > end_value:
                     flash("Tanggal mulai tidak boleh lebih besar dari tanggal akhir.", "error")
-                    return None  # Pastikan return None untuk logika yang salah
+                    return None
                 return func.date(getattr(Product, field)).between(start_value, end_value)
             elif operator == 'is_empty':
                 return getattr(Product, field).is_(None)
@@ -171,8 +171,10 @@ def get_productlist():
 
         condition = generate_condition(field, operator, value, start_value, end_value)
         
-        if condition is not None:
-            conditions.append(condition)
+        if field and operator and value:
+            condition = generate_condition(field, operator, value)
+            if condition is not None:
+                conditions.append(condition)
 
     # Menangani filter group jika ada
     if len(group_filter_logic) > 0:
