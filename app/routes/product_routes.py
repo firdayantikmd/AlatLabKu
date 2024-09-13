@@ -78,143 +78,168 @@ def get_productlist():
     filter_value_start = request.args.getlist('filter_value_start[]')
     filter_value_end = request.args.getlist('filter_value_end[]')
 
+    # Inisialisasi query dan kondisi
     query = Product.query
-
-    conditions = []  # Untuk filter rule biasa
+    conditions = []  # Untuk filter rule individual
     group_conditions = []  # Untuk filter group
 
-    # Fungsi untuk menghasilkan kondisi SQLAlchemy
-    def generate_condition(field, operator, value, start_value=None, end_value=None):
-        if field in ['created_at', 'updated_at']:
-            if operator == 'is' and start_value:
-                return func.date(getattr(Product, field)) == start_value
-            elif operator == 'is_before' and start_value:
-                return func.date(getattr(Product, field)) < start_value
-            elif operator == 'is_after' and start_value:
-                return func.date(getattr(Product, field)) > start_value
-            elif operator == 'is_between' and start_value and end_value:
-                if start_value > end_value:
-                    flash("Tanggal mulai tidak boleh lebih besar dari tanggal akhir.", "error")
-                    return None
-                return func.date(getattr(Product, field)).between(start_value, end_value)
-            elif operator == 'is_empty':
-                return getattr(Product, field).is_(None)
-            elif operator == 'is_not_empty':
-                return getattr(Product, field).isnot_(None)
-        else:
-            if field in ['product_name', 'code', 'details']:
-                if operator == 'is':
-                    return getattr(Product, field) == value
-                elif operator == 'is_not':
-                    return getattr(Product, field) != value
-                elif operator == 'contains':
-                    return getattr(Product, field).ilike(f'%{value}%')
-                elif operator == 'does_not_contain':
-                    return ~getattr(Product, field).ilike(f'%{value}%')
-                elif operator == 'starts_with':
-                    return getattr(Product, field).ilike(f'{value}%')
-                elif operator == 'ends_with':
-                    return getattr(Product, field).ilike(f'%{value}')
-                elif operator == 'is_empty':
-                    return getattr(Product, field).is_(None)
-                elif operator == 'is_not_empty':
-                    return getattr(Product, field).isnot_(None)
-            elif field in ['category', 'storage']:
-                if operator == 'is':
-                    return getattr(Product, field) == value
-                elif operator == 'is_not':
-                    return getattr(Product, field) != value
-                elif operator == 'is_empty':
-                    return getattr(Product, field).is_(None)
-                elif operator == 'is_not_empty':
-                    return getattr(Product, field).isnot_(None)
-            if field == 'stock':
-                if value == '' or value is None:
-                    return None
-
-                if operator == '=':
-                    return Product.stock == value
-                elif operator == '!=':
-                    return Product.stock != value
-                elif operator == '>':
-                    return Product.stock > value
-                elif operator == '<':
-                    return Product.stock < value
-                elif operator == '>=':
-                    return Product.stock >= value
-                elif operator == '<=':
-                    return Product.stock <= value
-                elif operator == 'is_empty':
-                    return getattr(Product, field).is_(None)
-                elif operator == 'is_not_empty':
-                    return getattr(Product, field).isnot_(None)
-            elif field == 'stock_status':
-                if operator == 'is':
-                    if value == 'available':
-                        return Product.stock > 0
-                    else:
-                        return Product.stock <= 0
-                elif operator == 'is_not':
-                    if value == 'available':
-                        return Product.stock <= 0
-                    else:
-                        return Product.stock > 0
+    # Fungsi untuk kondisi berbasis teks atau kategori
+    def handle_text_condition(field, operator, value):
+        if operator == 'is':
+            return getattr(Product, field) == value
+        elif operator == 'is_not':
+            return getattr(Product, field) != value
+        elif operator == 'contains':
+            return getattr(Product, field).ilike(f'%{value}%')
+        elif operator == 'does_not_contain':
+            return ~getattr(Product, field).ilike(f'%{value}%')
+        elif operator == 'starts_with':
+            return getattr(Product, field).ilike(f'{value}%')
+        elif operator == 'ends_with':
+            return getattr(Product, field).ilike(f'%{value}')
+        elif operator == 'is_empty':
+            return getattr(Product, field).is_(None)
+        elif operator == 'is_not_empty':
+            return getattr(Product, field).isnot_(None)
         return None
 
-    # Menggabungkan kondisi dari filter rule individual
-    for i in range(len(filter_field)):
-        field = filter_field[i]
-        operator = filter_operator[i]
-        
-        # Periksa apakah nilai yang ingin diakses ada
-        value = filter_value[i] if len(filter_value) > i else None
-        start_value = filter_value_start[i] if len(filter_value_start) > i else None
-        end_value = filter_value_end[i] if len(filter_value_end) > i else None
+    # Fungsi untuk kondisi berbasis tanggal
+    def handle_date_condition(field, operator, start_value=None, end_value=None):
+        if operator == 'is' and start_value:
+            return func.date(getattr(Product, field)) == start_value
+        elif operator == 'is_before' and start_value:
+            return func.date(getattr(Product, field)) < start_value
+        elif operator == 'is_after' and start_value:
+            return func.date(getattr(Product, field)) > start_value
+        elif operator == 'is_between' and start_value and end_value:
+            if start_value > end_value:
+                flash("Tanggal mulai tidak boleh lebih besar dari tanggal akhir.", "error")
+                return None
+            return func.date(getattr(Product, field)).between(start_value, end_value)
+        elif operator == 'is_empty':
+            return getattr(Product, field).is_(None)
+        elif operator == 'is_not_empty':
+            return getattr(Product, field).isnot_(None)
+        return None
 
-        if field and operator and (value or start_value):  # Periksa setidaknya salah satu nilai ada
-            condition = generate_condition(field, operator, value, start_value, end_value)
+    # Fungsi untuk kondisi berbasis stok
+    def handle_stock_condition(operators, values):
+        """
+        Handle stock condition as a range if multiple operators are provided
+        """
+        stock_conditions = []
+
+        for operator, value in zip(operators, values):
+            if value == '' or value is None:
+                continue
+            if operator == '=':
+                stock_conditions.append(Product.stock == value)
+            elif operator == '!=':
+                stock_conditions.append(Product.stock != value)
+            elif operator == '>':
+                stock_conditions.append(Product.stock > value)
+            elif operator == '<':
+                stock_conditions.append(Product.stock < value)
+            elif operator == '>=':
+                stock_conditions.append(Product.stock >= value)
+            elif operator == '<=':
+                stock_conditions.append(Product.stock <= value)
+
+        if len(stock_conditions) == 2:
+            # Combine the conditions for stock (e.g., >= 10 and <= 50)
+            return and_(*stock_conditions)
+        elif len(stock_conditions) == 1:
+            return stock_conditions[0]
+        else:
+            return None
+
+    # Fungsi untuk kondisi berbasis status stok
+    def handle_stock_status_condition(operator, value):
+        if operator == 'is':
+            return Product.stock > 0 if value == 'available' else Product.stock <= 0
+        elif operator == 'is_not':
+            return Product.stock <= 0 if value == 'available' else Product.stock > 0
+        return None
+
+    # Fungsi untuk menghasilkan kondisi SQLAlchemy
+    def generate_condition(field, operators, values, start_value=None, end_value=None):
+        if field in ['created_at', 'updated_at']:
+            return handle_date_condition(field, operators[0], start_value, end_value)
+        elif field in ['product_name', 'code', 'details', 'category', 'storage']:
+            return handle_text_condition(field, operators[0], values[0])
+        elif field == 'stock':
+            return handle_stock_condition(operators, values)
+        elif field == 'stock_status':
+            return handle_stock_status_condition(operators[0], values[0])
+        return None
+
+    # Memproses filter individual
+    def process_filter_rules():
+        # Mengelompokkan filter berdasarkan field
+        field_operator_value_map = {}
+
+        for i in range(len(filter_field)):
+            field = filter_field[i]
+            operator = filter_operator[i]
+            value = filter_value[i] if len(filter_value) > i else None
+
+            if field not in field_operator_value_map:
+                field_operator_value_map[field] = {'operators': [], 'values': []}
+
+            field_operator_value_map[field]['operators'].append(operator)
+            field_operator_value_map[field]['values'].append(value)
+
+        for field, ops_vals in field_operator_value_map.items():
+            condition = generate_condition(field, ops_vals['operators'], ops_vals['values'])
             if condition is not None:
                 conditions.append(condition)
 
-    # Menangani filter group jika ada
-    if len(group_filter_logic) > 0:
-        group_conditions = []
-        for i, group_logic in enumerate(group_filter_logic):
-            group_field = filter_field[i]
-            group_operator = filter_operator[i]
-            group_value = filter_value[i] if len(filter_value) > i else None
-            condition = generate_condition(group_field, group_operator, group_value)
-            
-            # Periksa apakah condition tidak None
-            if condition is not None:
-                group_conditions.append(condition)
+    # Memproses filter grup
+    def process_group_filters():
+        if len(group_filter_logic) > 0:
+            for i, group_logic in enumerate(group_filter_logic):
+                group_field = filter_field[i]
+                group_operator = filter_operator[i]
+                group_value = filter_value[i] if len(filter_value) > i else None
 
-        # Gabungkan grup filter sesuai logika AND/OR
-        if len(group_conditions) > 0:
-            combined_group_conditions = group_conditions[0]
-            for j in range(1, len(group_conditions)):
-                if group_filter_logic[j - 1] == 'and':
-                    combined_group_conditions = and_(combined_group_conditions, group_conditions[j])
-                elif group_filter_logic[j - 1] == 'or':
-                    combined_group_conditions = or_(combined_group_conditions, group_conditions[j])
+                condition = generate_condition(group_field, [group_operator], [group_value])
+                if condition is not None:
+                    group_conditions.append(condition)
 
-            # Tambahkan kondisi grup ke dalam kondisi utama
-            conditions.append(combined_group_conditions)
+            if len(group_conditions) > 0:
+                combined_group_conditions = group_conditions[0]
+                for j in range(1, len(group_conditions)):
+                    if group_filter_logic[j - 1] == 'and':
+                        combined_group_conditions = and_(combined_group_conditions, group_conditions[j])
+                    elif group_filter_logic[j - 1] == 'or':
+                        combined_group_conditions = or_(combined_group_conditions, group_conditions[j])
+                conditions.append(combined_group_conditions)
 
-    # Jika ada kondisi, gabungkan semua filter dengan logika yang dipilih
-    if len(conditions) > 0:
-        combined_conditions = conditions[0]
-        for i in range(1, len(conditions)):
-            if len(filter_logic) > i - 1:  # Pastikan filter_logic cukup panjang
-                if filter_logic[i - 1] == 'and':
+    # Menggabungkan kondisi individual dan grup
+    def combine_conditions():
+        if len(conditions) > 0:
+            combined_conditions = conditions[0]
+            for i in range(1, len(conditions)):
+                if len(filter_logic) > i - 1:
+                    if filter_logic[i - 1] == 'and':
+                        combined_conditions = and_(combined_conditions, conditions[i])
+                    elif filter_logic[i - 1] == 'or':
+                        combined_conditions = or_(combined_conditions, conditions[i])
+                else:
                     combined_conditions = and_(combined_conditions, conditions[i])
-                elif filter_logic[i - 1] == 'or':
-                    combined_conditions = or_(combined_conditions, conditions[i])
-            else:
-                # Jika tidak ada logika untuk menggabungkan, default ke AND
-                combined_conditions = and_(combined_conditions, conditions[i])
+            return combined_conditions
+        return None
 
-        query = query.filter(combined_conditions)
+    # Proses filter
+    process_filter_rules()
+    process_group_filters()
+
+    # Gabungkan semua kondisi dan jalankan query
+    final_conditions = combine_conditions()
+
+    # Pastikan kondisi tidak None sebelum dijalankan
+    if final_conditions is not None:
+        query = query.filter(final_conditions)
 
     products = query.all()
 
