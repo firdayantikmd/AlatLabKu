@@ -68,119 +68,157 @@ def add_product():
 @product_routes.route('/productlist', methods=['GET'])
 @login_required
 def get_productlist():
+    # Mengambil semua parameter filter dari request
     filter_field = request.args.getlist('filter_field[]')
     filter_operator = request.args.getlist('filter_operator[]')
     filter_value = request.args.getlist('filter_value[]')
     filter_logic = request.args.getlist('filter_logic[]')
+
+    group_filter_logic = request.args.getlist('group_filter_logic[]')
     filter_value_start = request.args.getlist('filter_value_start[]')
     filter_value_end = request.args.getlist('filter_value_end[]')
 
     query = Product.query
 
-    conditions = []
+    conditions = []  # Untuk filter rule biasa
+    group_conditions = []  # Untuk filter group
 
-    for i in range(len(filter_field)):
-        field = filter_field[i]
-        operator = filter_operator[i]
-
+    # Fungsi untuk menghasilkan kondisi SQLAlchemy
+    def generate_condition(field, operator, value, start_value=None, end_value=None):
         if field in ['created_at', 'updated_at']:
-            start_value = filter_value_start[i] if len(filter_value_start) > i and filter_value_start[i] else None
-            end_value = filter_value_end[i] if len(filter_value_end) > i and filter_value_end[i] else None
-
             if operator == 'is' and start_value:
-                condition = func.date(getattr(Product, field)) == start_value
+                return func.date(getattr(Product, field)) == start_value
             elif operator == 'is_before' and start_value:
-                condition = func.date(getattr(Product, field)) < start_value
+                return func.date(getattr(Product, field)) < start_value
             elif operator == 'is_after' and start_value:
-                condition = func.date(getattr(Product, field)) > start_value
+                return func.date(getattr(Product, field)) > start_value
             elif operator == 'is_between' and start_value and end_value:
                 if start_value > end_value:
-                    flash("Start date cannot be later than end date.", "error")
-                    return redirect(request.url)
-                condition = func.date(getattr(Product, field)).between(start_value, end_value)
+                    flash("Tanggal mulai tidak boleh lebih besar dari tanggal akhir.", "error")
+                    return None  # Pastikan return None untuk logika yang salah
+                return func.date(getattr(Product, field)).between(start_value, end_value)
             elif operator == 'is_empty':
-                condition = getattr(Product, field) == None
+                return getattr(Product, field).is_(None)
             elif operator == 'is_not_empty':
-                condition = getattr(Product, field) != None
-            else:
-                continue
-        
+                return getattr(Product, field).isnot_(None)
         else:
-            value = filter_value[i]
-
             if field in ['product_name', 'code', 'details']:
                 if operator == 'is':
-                    condition = getattr(Product, field) == value
+                    return getattr(Product, field) == value
                 elif operator == 'is_not':
-                    condition = getattr(Product, field) != value
+                    return getattr(Product, field) != value
                 elif operator == 'contains':
-                    condition = getattr(Product, field).ilike(f'%{value}%')
+                    return getattr(Product, field).ilike(f'%{value}%')
                 elif operator == 'does_not_contain':
-                    condition = ~getattr(Product, field).ilike(f'%{value}%')
+                    return ~getattr(Product, field).ilike(f'%{value}%')
                 elif operator == 'starts_with':
-                    condition = getattr(Product, field).ilike(f'{value}%')
+                    return getattr(Product, field).ilike(f'{value}%')
                 elif operator == 'ends_with':
-                    condition = getattr(Product, field).ilike(f'%{value}')
+                    return getattr(Product, field).ilike(f'%{value}')
                 elif operator == 'is_empty':
-                    condition = getattr(Product, field) == None
+                    return getattr(Product, field).is_(None)
                 elif operator == 'is_not_empty':
-                    condition = getattr(Product, field) != None
-
+                    return getattr(Product, field).isnot_(None)
             elif field in ['category', 'storage']:
                 if operator == 'is':
-                    condition = getattr(Product, field) == value
+                    return getattr(Product, field) == value
                 elif operator == 'is_not':
-                    condition = getattr(Product, field) != value
+                    return getattr(Product, field) != value
                 elif operator == 'is_empty':
-                    condition = getattr(Product, field) == None
+                    return getattr(Product, field).is_(None)
                 elif operator == 'is_not_empty':
-                    condition = getattr(Product, field) != None
+                    return getattr(Product, field).isnot_(None)
+            if field == 'stock':
+                if value == '' or value is None:
+                    return None
 
-            elif field == 'stock':
                 if operator == '=':
-                    condition = Product.stock == value
+                    return Product.stock == value
                 elif operator == '!=':
-                    condition = Product.stock != value
+                    return Product.stock != value
                 elif operator == '>':
-                    condition = Product.stock > value
+                    return Product.stock > value
                 elif operator == '<':
-                    condition = Product.stock < value
+                    return Product.stock < value
                 elif operator == '>=':
-                    condition = Product.stock >= value
+                    return Product.stock >= value
                 elif operator == '<=':
-                    condition = Product.stock <= value
+                    return Product.stock <= value
                 elif operator == 'is_empty':
-                    condition = Product.stock == None
+                    return getattr(Product, field).is_(None)
                 elif operator == 'is_not_empty':
-                    condition = Product.stock != None
-
+                    return getattr(Product, field).isnot_(None)
             elif field == 'stock_status':
                 if operator == 'is':
                     if value == 'available':
-                        condition = Product.stock > 0
+                        return Product.stock > 0
                     else:
-                        condition = Product.stock <= 0
+                        return Product.stock <= 0
                 elif operator == 'is_not':
                     if value == 'available':
-                        condition = Product.stock <= 0
+                        return Product.stock <= 0
                     else:
-                        condition = Product.stock > 0
-        
-        conditions.append(condition)
+                        return Product.stock > 0
+        return None
 
-    if conditions:
+    # Menggabungkan kondisi dari filter rule individual
+    for i in range(len(filter_field)):
+        field = filter_field[i]
+        operator = filter_operator[i]
+        value = filter_value[i]
+        start_value = filter_value_start[i] if len(filter_value_start) > i else None
+        end_value = filter_value_end[i] if len(filter_value_end) > i else None
+
+        condition = generate_condition(field, operator, value, start_value, end_value)
+        
+        if condition is not None:
+            conditions.append(condition)
+
+    # Menangani filter group jika ada
+    if len(group_filter_logic) > 0:
+        group_conditions = []
+        for i, group_logic in enumerate(group_filter_logic):
+            group_field = filter_field[i]
+            group_operator = filter_operator[i]
+            group_value = filter_value[i]
+            condition = generate_condition(group_field, group_operator, group_value)
+            
+            # Periksa apakah condition tidak None
+            if condition is not None:
+                group_conditions.append(condition)
+
+        # Gabungkan grup filter sesuai logika AND/OR
+        if len(group_conditions) > 0:
+            combined_group_conditions = group_conditions[0]
+            for j in range(1, len(group_conditions)):
+                if group_filter_logic[j - 1] == 'and':
+                    combined_group_conditions = and_(combined_group_conditions, group_conditions[j])
+                elif group_filter_logic[j - 1] == 'or':
+                    combined_group_conditions = or_(combined_group_conditions, group_conditions[j])
+
+            # Tambahkan kondisi grup ke dalam kondisi utama
+            conditions.append(combined_group_conditions)
+
+    # Jika ada kondisi, gabungkan semua filter dengan logika yang dipilih
+    if len(conditions) > 0:
         combined_conditions = conditions[0]
         for i in range(1, len(conditions)):
-            if filter_logic[i-1] == 'and':
+            if len(filter_logic) > i - 1:  # Pastikan filter_logic cukup panjang
+                if filter_logic[i - 1] == 'and':
+                    combined_conditions = and_(combined_conditions, conditions[i])
+                elif filter_logic[i - 1] == 'or':
+                    combined_conditions = or_(combined_conditions, conditions[i])
+            else:
+                # Jika tidak ada logika untuk menggabungkan, default ke AND
                 combined_conditions = and_(combined_conditions, conditions[i])
-            elif filter_logic[i-1] == 'or':
-                combined_conditions = or_(combined_conditions, conditions[i])
 
         query = query.filter(combined_conditions)
 
     products = query.all()
 
+    # Mengembalikan template dengan produk yang difilter
     return render_template('productlist.html', products=products)
+
 
 @product_routes.route('/productdetails/<int:id>')
 @login_required

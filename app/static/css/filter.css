@@ -1,14 +1,38 @@
-#filter_inputs {
-    margin-bottom: 20px;
+/* Style for filter group */
+.filter-group {
+    background-color: #FFFFFF;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 15px;
 }
 
-/* Three-Dot Menu Button Styling */
+/* Style for nested groups */
+.nested-group {
+    border-left: 2px solid #ced4da;
+}
+
+/* Style for filter rules without card */
+.filter-rule {
+    background-color: #fff;
+    border-radius: 4px;
+}
+/* Styling for buttons */
+.filter-rule .btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.filter-rule .btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+/* Dropdown button styling */
 .dropdown button.btn-light {
     background-color: transparent;
     border: none;
     color: #007bff;
     font-size: 14px;
-    margin-left: auto;
     padding: 0.25rem 0.5rem;
 }
 
@@ -16,30 +40,38 @@
     color: #0056b3;
 }
 
+/* Dropdown menu item styling */
 .dropdown-menu .dropdown-item {
     font-size: 14px;
     color: #007bff;
-    cursor: pointer;
     padding: 0.5rem 1rem;
 }
 
 .dropdown-menu .dropdown-item:hover {
     background-color: #f1f1f1;
-    color: #0056b3;
 }
 
-/* Add Rule Button (Bottom) */
+/* Add rule and group buttons */
 #filter-rules-container .btn-secondary {
-    font-size: 14px;
-    padding: 0.5rem 1rem;
     background-color: #6c757d;
     color: #fff;
-    border: 1px solid #6c757d;
-    border-radius: 0.25rem;
-    cursor: pointer;
 }
 
 #filter-rules-container .btn-secondary:hover {
     background-color: #5a6268;
-    border-color: #545b62;
+}
+
+/* Transitions */
+.filter-group, .filter-rule {
+    transition: all 0.3s ease;
+}
+
+.filter-group.added, .filter-rule.added {
+    transform: scale(1.05);
+}
+
+.filter-group.removed, .filter-rule.removed {
+    opacity: 0;
+    transform: scale(0.95);
+    transition: all 0.3s ease;
 }
