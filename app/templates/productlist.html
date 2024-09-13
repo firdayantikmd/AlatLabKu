@@ -203,11 +203,13 @@
         });
     }
 
+    // Menginisialisasi saat DOM sudah siap
     document.addEventListener('DOMContentLoaded', () => {
         initializeEventListeners();
         loadFilterSettings();
     });
 
+    // Inisialisasi event listeners untuk tombol dan interaksi pengguna
     const initializeEventListeners = () => {
         const filterIcon = document.getElementById('filter-icon');
         const clearFilter = document.getElementById('clear-filter');
@@ -220,6 +222,7 @@
         addFilterGroupBtn?.addEventListener('click', () => addFilterGroup());
     };
 
+    // Fungsi untuk menampilkan atau menyembunyikan bagian filter
     const toggleFilterSection = () => {
         const filterSection = document.getElementById('filter-inputs-section');
         if (filterSection) {
@@ -227,9 +230,11 @@
         }
     };
 
+    // Variabel global untuk menghitung jumlah filter dan group
     let filterCount = 0;
     let filterGroupCount = 0;
 
+    // Fungsi untuk menambahkan aturan filter baru
     const addFilterRule = (logic = true) => {
         filterCount++;
 
@@ -254,6 +259,7 @@
         document.getElementById(`filter-field-${filterCount}`).addEventListener('change', () => populateOperators(filterCount));
     };
 
+    // Fungsi untuk menambahkan grup filter baru
     const addFilterGroup = () => {
         filterGroupCount++;
         const filterRulesContainer = document.getElementById('filter-rules-container');
@@ -272,6 +278,7 @@
         document.getElementById(`add-rule-to-group-${filterGroupCount}`).addEventListener('click', () => addFilterRuleInGroup(filterGroupCount));
     };
 
+    // Fungsi untuk menambahkan aturan filter dalam grup
     const addFilterRuleInGroup = (groupId) => {
         const groupRulesContainer = document.getElementById(`filter-group-rules-${groupId}`);
         
@@ -286,6 +293,7 @@
         document.getElementById(`filter-field-${filterCount}`).addEventListener('change', () => populateOperators(filterCount));
     };
 
+    // Fungsi untuk mengisi operator berdasarkan tipe field
     const populateOperators = (filterId) => {
         const selectedField = document.getElementById(`filter-field-${filterId}`);
         const fieldType = selectedField.options[selectedField.selectedIndex].dataset.type;
@@ -301,6 +309,7 @@
         filterInputs.innerHTML = inputHTML;
     };
 
+    // Fungsi untuk menghapus filter group
     const deleteFilterGroup = (groupId) => {
         const filterGroup = document.getElementById(`filter-group-${groupId}`);
         const logicDropdown = document.getElementById(`group-logic-${groupId}`);
@@ -309,16 +318,16 @@
         if (logicDropdown) logicDropdown.remove();
     };
 
+    // Fungsi untuk menghapus filter
     const deleteFilter = (filterId) => {
         const filterRule = document.getElementById(`filter-rule-${filterId}`);
         if (filterRule) filterRule.remove();
     };
 
+    // Fungsi untuk memperbarui ID filter yang digandakan
     const updateFilterIds = (newFilter, oldFilterId, newFilterId) => {
-        // Update ID untuk elemen utama filter
         newFilter.id = `filter-rule-${newFilterId}`;
 
-        // Update ID untuk dropdown field, operator, dan input value
         const field = newFilter.querySelector(`#filter-field-${oldFilterId}`);
         const operator = newFilter.querySelector(`#filter-operator-${oldFilterId}`);
         const input = newFilter.querySelector(`#filter-input-${oldFilterId}`);
@@ -327,11 +336,11 @@
         if (operator) operator.id = `filter-operator-${newFilterId}`;
         if (input) input.id = `filter-input-${newFilterId}`;
 
-        // Update ID untuk dropdown menu button (opsi remove dan duplicate)
         const dropdownButton = newFilter.querySelector(`#dropdownMenuButton-${oldFilterId}`);
         if (dropdownButton) dropdownButton.id = `dropdownMenuButton-${newFilterId}`;
     };
 
+    // Fungsi untuk menggandakan filter
     const duplicateFilter = (filterId) => {
         const originalFilter = document.getElementById(`filter-field-${filterId}`).closest('.filter-rule');
         const newFilter = originalFilter.cloneNode(true);
@@ -342,6 +351,7 @@
         addChangeEventToFilter(filterCount);
     };
 
+    // Fungsi-fungsi helper untuk membuat HTML filter rule, dropdown, dll.
     const getLogicDropdownHTML = (filterCount) => `
         <div class="col-md-2 col-sm-12 mb-3">
             <select id="filter-logic-${filterCount}" name="filter_logic[]" class="form-control">
@@ -382,6 +392,7 @@
             </div>
         </div>`;
 
+    // Fungsi untuk membuat dropdown logika group
     const getGroupLogicDropdownHTML = (filterGroupCount) => {
         const logicDropdown = document.createElement('div');
         logicDropdown.classList.add('row');
@@ -413,6 +424,7 @@
             </div>
         </div>`;
 
+    // Fungsi untuk mendapatkan operator berdasarkan tipe field
     const getOperatorHTML = (fieldType) => {
         switch (fieldType) {
             case 'text':
@@ -452,6 +464,7 @@
         }
     };
 
+    // Fungsi untuk mendapatkan input berdasarkan tipe field
     const getInputHTML = (fieldType) => {
         switch (fieldType) {
             case 'text':
@@ -473,6 +486,7 @@
         }
     };
 
+    // Fungsi untuk memvalidasi form filter
     const validateFilterForm = () => {
         const fields = document.querySelectorAll('select[name="filter_field[]"]');
         const operators = document.querySelectorAll('select[name="filter_operator[]"]');
@@ -524,6 +538,7 @@
         return true;
     };
 
+    // Fungsi untuk menyimpan pengaturan filter di localStorage
     const saveFilterSettings = () => {
         const filters = document.querySelectorAll('.filter-rule');
         let filterSettings = [];
@@ -534,22 +549,18 @@
             filterSettings.push({ field, operator, value });
         });
         localStorage.setItem('filterSettings', JSON.stringify(filterSettings));
-    }
+    };
 
-    // Load filter settings from localStorage
+    // Fungsi untuk memuat pengaturan filter dari localStorage
     const loadFilterSettings = () => {
         const filterSettings = JSON.parse(localStorage.getItem('filterSettings'));
         if (filterSettings) {
             filterSettings.forEach(filter => {
                 addFilterRule();
-                // Apply saved values
+                // Terapkan nilai yang disimpan
             });
         }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        loadFilterSettings();
-    });
+    };
     </script>
 
 </body>
