@@ -165,14 +165,14 @@ def get_productlist():
     for i in range(len(filter_field)):
         field = filter_field[i]
         operator = filter_operator[i]
-        value = filter_value[i]
+        
+        # Periksa apakah nilai yang ingin diakses ada
+        value = filter_value[i] if len(filter_value) > i else None
         start_value = filter_value_start[i] if len(filter_value_start) > i else None
         end_value = filter_value_end[i] if len(filter_value_end) > i else None
 
-        condition = generate_condition(field, operator, value, start_value, end_value)
-        
-        if field and operator and value:
-            condition = generate_condition(field, operator, value)
+        if field and operator and (value or start_value):  # Periksa setidaknya salah satu nilai ada
+            condition = generate_condition(field, operator, value, start_value, end_value)
             if condition is not None:
                 conditions.append(condition)
 
@@ -182,7 +182,7 @@ def get_productlist():
         for i, group_logic in enumerate(group_filter_logic):
             group_field = filter_field[i]
             group_operator = filter_operator[i]
-            group_value = filter_value[i]
+            group_value = filter_value[i] if len(filter_value) > i else None
             condition = generate_condition(group_field, group_operator, group_value)
             
             # Periksa apakah condition tidak None
@@ -220,7 +220,6 @@ def get_productlist():
 
     # Mengembalikan template dengan produk yang difilter
     return render_template('productlist.html', products=products)
-
 
 @product_routes.route('/productdetails/<int:id>')
 @login_required
