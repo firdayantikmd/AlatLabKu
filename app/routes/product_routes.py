@@ -271,17 +271,24 @@ def get_productlist():
                     'value': values
                 })
 
-        conditions = []
-        conditions += process_filter_rules(filter_fields, filter_operators, filter_values, filter_logics)
-        conditions += process_group_filters(group_filters, group_logics)
+        individual_conditions = process_filter_rules(filter_fields, filter_operators, filter_values, filter_logics)
+        group_conditions = process_group_filters(group_filters, group_logics)
 
-        final_condition = build_condition(conditions)
-        if final_condition is not None:
-            print(f"Applying conditions to query: {final_condition}")
+        combined_conditions = []
+        if individual_conditions:
+            individual_condition = build_condition(individual_conditions)
+            combined_conditions.append(individual_condition)
+        
+        if group_conditions:
+            group_condition = build_condition(group_conditions)
+            combined_conditions.append(group_condition)
+
+        # Combine both individual and group conditions using `or_`
+        if combined_conditions:
+            final_condition = or_(*combined_conditions)
             query = query.filter(final_condition)
 
     products = query.all()
-    print(f"Found {len(products)} products matching filters.")
     return render_template('productlist.html', products=products)
 
 @product_routes.route('/productdetails/<int:id>')
