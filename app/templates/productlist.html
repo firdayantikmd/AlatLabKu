@@ -69,7 +69,7 @@
 
                         <div class="card mb-0" id="filter-inputs-section" style="display: none;">
                             <div class="card-body">
-                                <form method="GET" action="{{ url_for('product_routes.get_productlist') }}" onsubmit="return validateFilterForm()">
+                                <form method="POST" action="{{ url_for('product_routes.get_productlist') }}" onsubmit="return validateFilterForm()">
                                     <div id="filter-rules-container">
                                         <div class="row">
                                             <!-- filter rule -->
@@ -254,19 +254,20 @@
         const filterRulesContainer = document.getElementById('filter-rules-container');
         if (!filterRulesContainer) return;
 
-        const existingFields = document.querySelectorAll('select[name="filter_field[]"]');
-        existingFields.forEach(field => {
-            if (field.value === `filter-field-${filterCount}`) {
-                alert('Filter field already exists');
-                return;
-            }
-        });
+        // Logic Dropdown Node
+        let logicDropdownNode = null;
+        if (filterCount > 1 && logic) {
+            logicDropdownNode = getLogicDropdownHTML(filterCount);
+        }
 
-        const logicDropdown = (filterCount > 1 && logic) ? getLogicDropdownHTML(filterCount) : '';
         const newFilterRule = document.createElement('div');
         newFilterRule.classList.add('row', 'filter-rule');
         newFilterRule.id = `filter-rule-${filterCount}`;
-        newFilterRule.innerHTML = getFilterRuleHTML(logicDropdown, filterCount);
+        newFilterRule.innerHTML = getFilterRuleHTML('', filterCount);
+
+        if (logicDropdownNode) {
+            filterRulesContainer.appendChild(logicDropdownNode);
+        }
 
         filterRulesContainer.appendChild(newFilterRule);
         console.log(`Added filter rule #${filterCount} to container`);
@@ -279,9 +280,15 @@
         console.log(`Adding filter group #${filterGroupCount}`);
         const filterRulesContainer = document.getElementById('filter-rules-container');
 
-        if (filterGroupCount > 0) {
-            const logicDropdown = getGroupLogicDropdownHTML(filterGroupCount);
-            filterRulesContainer.appendChild(logicDropdown);
+        let logicDropdownNode = null;
+        if (filterGroupCount > 1) {
+            logicDropdownNode = getGroupLogicDropdownHTML(filterGroupCount);
+        } else if (filterCount > 0) {
+            logicDropdownNode = getGroupLogicDropdownHTML(filterGroupCount);
+        }
+
+        if (logicDropdownNode) {
+            filterRulesContainer.appendChild(logicDropdownNode);
             console.log(`Added group logic dropdown for group #${filterGroupCount}`);
         }
 
@@ -302,10 +309,18 @@
         
         filterCount++;
 
-        const logicDropdown = groupRulesContainer.children.length > 0 ? getLogicDropdownHTML(filterCount) : '';
+        let logicDropdownNode = null;
+        if (groupRulesContainer.children.length > 0) {
+            logicDropdownNode = getGroupRuleLogicDropdownHTML(groupId);
+        }
+
         const newRule = document.createElement('div');
         newRule.classList.add('row', 'filter-rule');
-        newRule.innerHTML = getFilterRuleHTML(logicDropdown, filterCount);
+        newRule.innerHTML = getGroupFilterRuleHTML('', filterCount, groupId);
+
+        if (logicDropdownNode) {
+            groupRulesContainer.appendChild(logicDropdownNode);
+        }
 
         groupRulesContainer.appendChild(newRule);
         console.log(`Added filter rule #${filterCount} to group #${groupId}`);
@@ -329,6 +344,22 @@
         filterInputs.innerHTML = inputHTML;
 
         console.log(`Populated operators for field type: ${fieldType}`);
+
+        const operatorSelect = document.getElementById(`filter-operator-${filterId}`);
+        operatorSelect.addEventListener('change', () => {
+            const selectedOperator = operatorSelect.value;
+            const inputFields = document.querySelectorAll(`#filter-input-${filterId} input`);
+
+            if (fieldType === 'date' && inputFields.length > 1) {
+                if (selectedOperator === 'is_between') {
+                    inputFields[1].style.display = 'block';
+                } else {
+                    inputFields[1].style.display = 'none';
+                }
+            }
+        });
+        // Trigger change event to set initial state
+        operatorSelect.dispatchEvent(new Event('change'));
     };
 
     // Fungsi untuk menghapus filter group
@@ -378,13 +409,16 @@
     };
 
     // Fungsi-fungsi helper untuk membuat HTML filter rule, dropdown, dll.
-    const getLogicDropdownHTML = (filterCount) => `
-        <div class="col-md-2 col-sm-12 mb-3">
+    const getLogicDropdownHTML = (filterCount) => {
+        const div = document.createElement('div');
+        div.classList.add('col-md-1', 'col-sm-12', 'mb-3');
+        div.innerHTML = `
             <select id="filter-logic-${filterCount}" name="filter_logic[]" class="form-control">
                 <option value="and">AND</option>
                 <option value="or">OR</option>
-            </select>
-        </div>`;
+            </select>`;
+        return div;
+    };
 
     const getFilterRuleHTML = (logicDropdown, filterCount) => `
         ${logicDropdown}
@@ -418,18 +452,20 @@
             </div>
         </div>`;
 
-    // Fungsi untuk membuat dropdown logika group
+    // Fungsi untuk membuat dropdown logika group penghubung antara filter group dengan filter individual atau filter individual dengan filter individual
     const getGroupLogicDropdownHTML = (filterGroupCount) => {
-        const logicDropdown = document.createElement('div');
-        logicDropdown.classList.add('row');
-        logicDropdown.innerHTML = `
-            <div class="col-md-2 col-sm-12 mb-3" id="group-logic-${filterGroupCount}">
-                <select name="group_filter_logic[]" class="form-control">
-                    <option value="and">AND</option>
-                    <option value="or">OR</option>
-                </select>
-            </div>`;
-        return logicDropdown;
+        const rowDiv = document.createElement('div');
+        rowDiv.classList.add('row');
+        const colDiv = document.createElement('div');
+        colDiv.classList.add('col-md-1', 'col-sm-12', 'mb-3');
+        colDiv.id = `group-logic-${filterGroupCount}`;
+        colDiv.innerHTML = `
+            <select name="group_logic[]" class="form-control">
+                <option value="and">AND</option>
+                <option value="or">OR</option>
+            </select>`;
+        rowDiv.appendChild(colDiv);
+        return rowDiv;
     };
 
     const getFilterGroupHTML = (filterGroupCount) => `
@@ -449,6 +485,52 @@
                 </div>
             </div>
         </div>`;
+
+    // fungsi untuk menambahkan filter rule di dalam filter group
+    const getGroupFilterRuleHTML = (logicDropdown, filterCount, groupId) => `
+        ${logicDropdown}
+        <div class="col-md-2 col-sm-12 mb-3">
+            <select id="filter-field-${filterCount}" name="group[${groupId}][field][]" class="form-control">
+                <option value="">Pilih Filter</option>
+                <option value="product_name" data-type="text">Nama Produk</option>
+                <option value="category" data-type="text">Kategori</option>
+                <option value="code" data-type="text">Kode Produk</option>
+                <option value="storage" data-type="text">Tempat Barang</option>
+                <option value="stock" data-type="number">Stok</option>
+                <option value="stock_status" data-type="dropdown">Status Stok</option>
+                <option value="created_at" data-type="date">Ditambahkan Pada</option>
+                <option value="updated_at" data-type="date">Diperbaharui Pada</option>
+            </select>
+        </div>
+        <!-- Sisanya sama seperti getFilterRuleHTML, tapi pastikan nama input disesuaikan -->
+        <div class="col-md-2 col-sm-12 mb-3">
+            <select id="filter-operator-${filterCount}" name="group[${groupId}][operator][]" class="form-control"></select>
+        </div>
+        <div class="col-md-2 col-sm-12 mb-3" id="filter-input-${filterCount}">
+            <input type="text" name="group[${groupId}][value][]" class="form-control" placeholder="Enter value">
+        </div>
+        <div class="col-md-2 col-sm-12 mb-3">
+            <div class="dropdown">
+                <button class="btn btn-light" type="button" id="dropdownMenuButton-${filterCount}" data-bs-toggle="dropdown" aria-expanded="false">
+                    &bull;&bull;&bull;
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-${filterCount}">
+                    <li><a class="dropdown-item remove-group" href="#" onclick="deleteFilter(${filterCount})">Remove</a></li>
+                </ul>
+            </div>
+        </div>`;
+    
+    // fungsi untuk operator antara filter rule di dalam group
+    const getGroupRuleLogicDropdownHTML = (groupId) => {
+        const div = document.createElement('div');
+        div.classList.add('col-md-1', 'col-sm-12', 'mb-3');
+        div.innerHTML = `
+            <select name="group[${groupId}][logic][]" class="form-control">
+                <option value="and">AND</option>
+                <option value="or">OR</option>
+            </select>`;
+        return div;
+    };
 
     // Fungsi untuk mendapatkan operator berdasarkan tipe field
     const getOperatorHTML = (fieldType) => {
@@ -505,8 +587,8 @@
                     </select>`;
             case 'date':
                 return `
-                    <input type="date" name="filter_value_start[]" class="form-control mb-2" placeholder="Start Date">
-                    <input type="date" name="filter_value_end[]" class="form-control" placeholder="End Date" style="display:none;">`;
+                    <input type="date" name="filter_value[]" class="form-control mb-2" placeholder="Start Date">
+                    <input type="date" name="filter_value[]" class="form-control" placeholder="End Date" style="display:none;">`;
             default:
                 return '';
         }
