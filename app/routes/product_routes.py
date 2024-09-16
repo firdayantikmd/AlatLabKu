@@ -65,215 +65,223 @@ def add_product():
 
     return render_template('addproduct.html',  products=products, pagination=pagination)
 
+def handle_text_condition(field, operator, value):
+    """Generate SQLAlchemy condition for text fields."""
+    print(f"Handling text condition: field={field}, operator={operator}, value={value}")
+    column = getattr(Product, field)
+    if operator == 'is':
+        return column == value
+    elif operator == 'is_not':
+        return column != value
+    elif operator == 'contains':
+        return column.ilike(f'%{value}%')
+    elif operator == 'does_not_contain':
+        return ~column.ilike(f'%{value}%')
+    elif operator == 'starts_with':
+        return column.ilike(f'{value}%')
+    elif operator == 'ends_with':
+        return column.ilike(f'%{value}')
+    elif operator == 'is_empty':
+        return column.is_(None)
+    elif operator == 'is_not_empty':
+        return column.is_not(None)
+    return None
+
+def handle_date_condition(field, operator, value):
+    """Generate SQLAlchemy condition for date fields."""
+    print(f"Handling date condition: field={field}, operator={operator}, value={value}")
+    column = func.date(getattr(Product, field))
+    if operator == 'is' and value:
+        return column == value
+    elif operator == 'is_before' and value:
+        return column < value
+    elif operator == 'is_after' and value:
+        return column > value
+    elif operator == 'is_between' and isinstance(value, list) and len(value) == 2:
+        start_value, end_value = value
+        if start_value > end_value:
+            flash("Start date cannot be after end date.", "error")
+            return None
+        return column.between(start_value, end_value)
+    elif operator == 'is_empty':
+        return column.is_(None)
+    elif operator == 'is_not_empty':
+        return column.is_not(None)
+    return None
+
+def handle_stock_condition(operator, value):
+    """Generate SQLAlchemy condition for the stock field."""
+    print(f"Handling stock condition: operator={operator}, value={value}")
+    if not value:
+        return None
+    try:
+        value = int(value)
+    except ValueError:
+        flash("Invalid value for stock. Please enter a number.", "error")
+        return None
+    column = Product.stock
+    operators = {
+        '=': column == value,
+        '!=': column != value,
+        '>': column > value,
+        '<': column < value,
+        '>=': column >= value,
+        '<=': column <= value
+    }
+    return operators.get(operator)
+
+def handle_stock_status_condition(operator, value):
+    """Generate SQLAlchemy condition for stock status."""
+    print(f"Handling stock status condition: operator={operator}, value={value}")
+    column = Product.stock
+    is_available = column > 0
+    is_unavailable = column <= 0
+    if operator == 'is':
+        return is_available if value == 'available' else is_unavailable
+    elif operator == 'is_not':
+        return is_unavailable if value == 'available' else is_available
+    return None
+
+def generate_condition(field, operator, value):
+    """Generate SQLAlchemy condition based on field, operator, and value."""
+    print(f"Generating condition for field={field}, operator={operator}, value={value}")
+    if field in ['created_at', 'updated_at']:
+        return handle_date_condition(field, operator, value)
+    elif field in ['product_name', 'code', 'details', 'category', 'storage']:
+        return handle_text_condition(field, operator, value)
+    elif field == 'stock':
+        return handle_stock_condition(operator, value)
+    elif field == 'stock_status':
+        return handle_stock_status_condition(operator, value)
+    return None
+
+def build_condition(conditions_list):
+    """Recursively build SQLAlchemy conditions from a list."""
+    if not conditions_list:
+        return None
+    combined_condition = None
+    for logic, condition in conditions_list:
+        if isinstance(condition, list):
+            condition = build_condition(condition)
+        if combined_condition is None:
+            combined_condition = condition
+        else:
+            if logic == 'and':
+                combined_condition = and_(combined_condition, condition)
+            elif logic == 'or':
+                combined_condition = or_(combined_condition, condition)
+            else:
+                combined_condition = and_(combined_condition, condition)
+    return combined_condition
+
+def process_filter_rules(fields, operators, values, logics):
+    """Process individual filters and return conditions."""
+    conditions = []
+    value_index = 0
+    for idx, field in enumerate(fields):
+        operator = operators[idx]
+        logic = logics[idx - 1] if idx > 0 else None
+        operator_requires_value = operator not in ['is_empty', 'is_not_empty']
+        if field in ['created_at', 'updated_at'] and operator == 'is_between':
+            if value_index + 1 < len(values):
+                value = values[value_index:value_index + 2]
+                value_index += 2
+            else:
+                flash("Please provide both start and end dates.", "error")
+                return []
+        elif operator_requires_value:
+            if value_index < len(values):
+                value = values[value_index]
+                value_index += 1
+            else:
+                flash(f"Missing value for '{field}' with operator '{operator}'.", "error")
+                return []
+        else:
+            value = None
+        condition = generate_condition(field, operator, value)
+        if condition is not None:
+            conditions.append((logic, condition))
+    return conditions
+
+def process_group_filters(groups, group_logics):
+    """Process group filters and return conditions."""
+    conditions = []
+    for idx, group in enumerate(groups):
+        group_conditions = []
+        fields = group['field']
+        operators = group['operator']
+        values = group['value']
+        logics_inside = group['logic']
+        value_index = 0
+        for j, field in enumerate(fields):
+            operator = operators[j]
+            logic = logics_inside[j - 1] if j > 0 else None
+            operator_requires_value = operator not in ['is_empty', 'is_not_empty']
+            if field in ['created_at', 'updated_at'] and operator == 'is_between':
+                if value_index + 1 < len(values):
+                    value = values[value_index:value_index + 2]
+                    value_index += 2
+                else:
+                    flash("Please provide both start and end dates.", "error")
+                    return []
+            elif operator_requires_value:
+                if value_index < len(values):
+                    value = values[value_index]
+                    value_index += 1
+                else:
+                    flash(f"Missing value for '{field}' with operator '{operator}'.", "error")
+                    return []
+            else:
+                value = None
+            condition = generate_condition(field, operator, value)
+            if condition is not None:
+                group_conditions.append((logic, condition))
+        if idx == 0:
+            logic_between_groups = group_logics[0] if group_logics else None
+        else:
+            logic_between_groups = group_logics[idx] if idx < len(group_logics) else 'and'
+        conditions.append((logic_between_groups, group_conditions))
+    return conditions
+
 @product_routes.route('/productlist', methods=['GET', 'POST'])
 @login_required
 def get_productlist():
-    from sqlalchemy import and_, or_, func
-    from flask import request, render_template, flash
-
-    # Initialize query and conditions
+    """Display and filter the product list."""
     query = Product.query
-    conditions = []
-
     if request.method == 'POST':
-        # Individual filters
-        filter_field = request.form.getlist('filter_field[]')
-        filter_operator = request.form.getlist('filter_operator[]')
-        filter_value = request.form.getlist('filter_value[]')
-        filter_logic = request.form.getlist('filter_logic[]')
+        filter_fields = request.form.getlist('filter_field[]')
+        filter_operators = request.form.getlist('filter_operator[]')
+        filter_values = request.form.getlist('filter_value[]')
+        filter_logics = request.form.getlist('filter_logic[]')
 
-        # Group filters
         group_filters = []
-        group_logic = request.form.getlist('group_logic[]')  # Logic between groups
-
-        # Parse group filters
+        group_logics = request.form.getlist('group_logic[]')
         for key in request.form:
-            if key.startswith('group_filters['):
+            if key.startswith('group['):
                 group_id = key.split('[')[1].split(']')[0]
-                group_field = request.form.getlist(f'group_filters[{group_id}][field][]')
-                group_operator = request.form.getlist(f'group_filters[{group_id}][operator][]')
-                group_value = request.form.getlist(f'group_filters[{group_id}][value][]')
-                group_logic_inside = request.form.getlist(f'group_filters[{group_id}][logic][]')
-
+                fields = request.form.getlist(f'group[{group_id}][field][]')
+                operators = request.form.getlist(f'group[{group_id}][operator][]')
+                values = request.form.getlist(f'group[{group_id}][value][]')
+                logics_inside = request.form.getlist(f'group[{group_id}][logic][]')
                 group_filters.append({
                     'group_id': group_id,
-                    'logic': group_logic_inside,
-                    'field': group_field,
-                    'operator': group_operator,
-                    'value': group_value
+                    'logic': logics_inside,
+                    'field': fields,
+                    'operator': operators,
+                    'value': values
                 })
 
-        # Function to process individual filters
-        def process_filter_rules():
-            print("Processing individual filter rules")
-            i = 0  # Index for filter_value[]
-            for idx in range(len(filter_field)):
-                field = filter_field[idx]
-                operator = filter_operator[idx]
-                logic = filter_logic[idx - 1] if idx > 0 else 'and'
+        conditions = []
+        conditions += process_filter_rules(filter_fields, filter_operators, filter_values, filter_logics)
+        conditions += process_group_filters(group_filters, group_logics)
 
-                # For date fields with 'is_between', collect two values
-                if field in ['created_at', 'updated_at'] and operator == 'is_between':
-                    value = filter_value[i:i+2]
-                    i += 2
-                else:
-                    value = filter_value[i]
-                    i += 1
+        final_condition = build_condition(conditions)
+        if final_condition is not None:
+            print(f"Applying conditions to query: {final_condition}")
+            query = query.filter(final_condition)
 
-                condition = generate_condition(field, operator, value)
-                if condition is not None:
-                    conditions.append((condition, logic))
-
-        # Function to process group filters
-        def process_group_filters():
-            print("Processing group filters")
-            for idx, group in enumerate(group_filters):
-                group_conditions = []
-                group_fields = group['field']
-                group_operators = group['operator']
-                group_values = group['value']
-                group_logic_inside = group['logic']
-
-                i = 0  # Index for group_values[]
-                for j in range(len(group_fields)):
-                    field = group_fields[j]
-                    operator = group_operators[j]
-                    logic = group_logic_inside[j - 1] if j > 0 else 'and'
-
-                    # For date fields with 'is_between', collect two values
-                    if field in ['created_at', 'updated_at'] and operator == 'is_between':
-                        value = group_values[i:i+2]
-                        i += 2
-                    else:
-                        value = group_values[i]
-                        i += 1
-
-                    condition = generate_condition(field, operator, value)
-                    if condition is not None:
-                        group_conditions.append((condition, logic))
-
-        # Function for text-based conditions
-        def handle_text_condition(field, operator, value):
-            print(f"Handling text condition: field={field}, operator={operator}, value={value}")
-            if operator == 'is':
-                return getattr(Product, field) == value
-            elif operator == 'is_not':
-                return getattr(Product, field) != value
-            elif operator == 'contains':
-                return getattr(Product, field).ilike(f'%{value}%')
-            elif operator == 'does_not_contain':
-                return ~getattr(Product, field).ilike(f'%{value}%')
-            elif operator == 'starts_with':
-                return getattr(Product, field).ilike(f'{value}%')
-            elif operator == 'ends_with':
-                return getattr(Product, field).ilike(f'%{value}')
-            elif operator == 'is_empty':
-                return getattr(Product, field) == None
-            elif operator == 'is_not_empty':
-                return getattr(Product, field) != None
-            return None
-
-        # Function for date-based conditions
-        def handle_date_condition(field, operator, value):
-            print(f"Handling date condition: field={field}, operator={operator}, value={value}")
-            if operator == 'is' and value:
-                return func.date(getattr(Product, field)) == value
-            elif operator == 'is_before' and value:
-                return func.date(getattr(Product, field)) < value
-            elif operator == 'is_after' and value:
-                return func.date(getattr(Product, field)) > value
-            elif operator == 'is_between' and isinstance(value, (list, tuple)) and len(value) == 2:
-                start_value, end_value = value
-                if start_value > end_value:
-                    flash("Tanggal mulai tidak boleh lebih besar dari tanggal akhir.", "error")
-                    return None
-                return func.date(getattr(Product, field)).between(start_value, end_value)
-            elif operator == 'is_empty':
-                return getattr(Product, field) == None
-            elif operator == 'is_not_empty':
-                return getattr(Product, field) != None
-            return None
-
-        # Function for stock-based conditions
-        def handle_stock_condition(operator, value):
-            print(f"Handling stock condition: operator={operator}, value={value}")
-            if value == '' or value is None:
-                return None
-            if operator == '=':
-                return Product.stock == value
-            elif operator == '!=':
-                return Product.stock != value
-            elif operator == '>':
-                return Product.stock > value
-            elif operator == '<':
-                return Product.stock < value
-            elif operator == '>=':
-                return Product.stock >= value
-            elif operator == '<=':
-                return Product.stock <= value
-            return None
-
-        # Function for stock status conditions
-        def handle_stock_status_condition(operator, value):
-            print(f"Handling stock status condition: operator={operator}, value={value}")
-            if operator == 'is':
-                return Product.stock > 0 if value == 'available' else Product.stock <= 0
-            elif operator == 'is_not':
-                return Product.stock <= 0 if value == 'available' else Product.stock > 0
-            return None
-
-        # Function to generate SQLAlchemy conditions
-        def generate_condition(field, operator, value):
-            print(f"Generating condition for field: {field}, operator: {operator}, value: {value}")
-            if field in ['created_at', 'updated_at']:
-                if operator == 'is_between':
-                    # 'value' should be a list of two dates
-                    if isinstance(value, list) and len(value) == 2:
-                        return handle_date_condition(field, operator, value)
-                    else:
-                        print("Invalid value for 'is_between' operator. Expected list of two dates.")
-                        return None
-                else:
-                    return handle_date_condition(field, operator, value)
-            elif field in ['product_name', 'code', 'details', 'category', 'storage']:
-                return handle_text_condition(field, operator, value)
-            elif field == 'stock':
-                return handle_stock_condition(operator, value)
-            elif field == 'stock_status':
-                return handle_stock_status_condition(operator, value)
-            return None
-
-        # Function to combine conditions
-        def combine_conditions():
-            print(f"Combining conditions: {conditions}")
-            if conditions:
-                combined_conditions = conditions[0][0]
-                for i in range(1, len(conditions)):
-                    condition, logic = conditions[i]
-                    if logic == 'and':
-                        combined_conditions = and_(combined_conditions, condition)
-                    elif logic == 'or':
-                        combined_conditions = or_(combined_conditions, condition)
-                return combined_conditions
-            return None
-
-        # Process filters
-        process_filter_rules()
-        process_group_filters()
-
-        # Combine all conditions and execute query
-        final_conditions = combine_conditions()
-
-        if final_conditions is not None:
-            print(f"Final conditions applied to query: {final_conditions}")
-            query = query.filter(final_conditions)
-
-    # Fetch products
     products = query.all()
-
-    print(f"Query result: {len(products)} products found")
-
-    # Render the template with filtered products
+    print(f"Found {len(products)} products matching filters.")
     return render_template('productlist.html', products=products)
 
 @product_routes.route('/productdetails/<int:id>')

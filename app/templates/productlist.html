@@ -452,20 +452,18 @@
             </div>
         </div>`;
 
-    // Fungsi untuk membuat dropdown logika group penghubung antara filter group dengan filter individual atau filter individual dengan filter individual
+    // Function to create logic dropdown between groups
     const getGroupLogicDropdownHTML = (filterGroupCount) => {
-        const rowDiv = document.createElement('div');
-        rowDiv.classList.add('row');
-        const colDiv = document.createElement('div');
-        colDiv.classList.add('col-md-1', 'col-sm-12', 'mb-3');
-        colDiv.id = `group-logic-${filterGroupCount}`;
-        colDiv.innerHTML = `
-            <select name="group_logic[]" class="form-control">
-                <option value="and">AND</option>
-                <option value="or">OR</option>
-            </select>`;
-        rowDiv.appendChild(colDiv);
-        return rowDiv;
+        const div = document.createElement('div');
+        div.classList.add('row');
+        div.innerHTML = `
+            <div class="col-md-1 col-sm-12 mb-3">
+                <select name="group_logic[]" class="form-control">
+                    <option value="and">AND</option>
+                    <option value="or">OR</option>
+                </select>
+            </div>`;
+        return div;
     };
 
     const getFilterGroupHTML = (filterGroupCount) => `
